@@ -9,6 +9,10 @@ import { showToast } from '@/lib/toast'
 import { TrendingUp, TrendingDown, CreditCard, Shield, RefreshCw } from 'lucide-react'
 import { Transaction, Profile } from '@/types'
 
+/**
+ * Hallmark · macrostructure: Workbench · tone: Utilitarian+Warm · anchor hue: blue
+ * Last build: none (new session)
+ */
 export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<{
@@ -38,39 +42,23 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchSummary()
-
-    // Listen for transaction-saved custom event from layout
-    const handleSaved = () => {
-      fetchSummary()
-    }
+    const handleSaved = () => fetchSummary()
     window.addEventListener('transaction-saved', handleSaved)
     return () => window.removeEventListener('transaction-saved', handleSaved)
   }, [fetchSummary])
 
-  // Subscribing to realtime sync
   useRealtimeTransactions({
     householdId: data?.members[0]?.household_id || '',
     onNewTransaction: (newTxn) => {
-      // Avoid adding duplicate transactions
       setData((prev) => {
         if (!prev) return null
         const exists = prev.recentTransactions.some((t) => t.id === newTxn.id)
         if (exists) return prev
-
-        // Prepend and trim to latest 5
         const updatedRecent = [newTxn, ...prev.recentTransactions].slice(0, 5)
-
-        // Show live notify banner
         setRealtimeNotify(true)
         setTimeout(() => setRealtimeNotify(false), 3000)
-
-        // Trigger updating totals
         fetchSummary()
-
-        return {
-          ...prev,
-          recentTransactions: updatedRecent,
-        }
+        return { ...prev, recentTransactions: updatedRecent }
       })
     },
   })
@@ -78,22 +66,16 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="page-content pt-4 space-y-6">
-        {/* Header Skeleton */}
         <div className="space-y-2">
           <div className="h-4 w-24 skeleton"></div>
           <div className="h-8 w-48 skeleton"></div>
         </div>
-
-        {/* Bento Summary Skeleton */}
         <div className="grid grid-cols-2 gap-4">
           <div className="h-32 rounded-xl skeleton"></div>
           <div className="h-32 rounded-xl skeleton"></div>
         </div>
-
-        {/* Transactions Skeleton */}
         <div className="space-y-4">
           <div className="h-5 w-40 skeleton"></div>
-          <div className="h-24 rounded-xl skeleton"></div>
           <div className="h-24 rounded-xl skeleton"></div>
         </div>
       </div>
@@ -107,66 +89,54 @@ export default function DashboardPage() {
   const isDad = data.profile.role === 'dad'
 
   return (
-    <div className="page-content pt-4 space-y-6">
-      {/* Greeting Section */}
-      <section className="space-y-1">
-        <p className="text-meta text-text-muted">Welcome back</p>
-        <h2 className="text-section-heading text-xl text-text-primary">
+    <div className="page-content" style={{ paddingTop: 'var(--space-12)', paddingBottom: 'calc(var(--nav-height) + var(--space-8))', display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+      {/* Greeting */}
+      <section style={{ gap: 'var(--space-1)', display: 'flex', flexDirection: 'column' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Welcome back</p>
+        <h2 className="text-page-title">
           Hi, {data.profile.displayName} {isDad ? 'Dad 👋' : isMom ? 'Mom 👋' : '👋'}
         </h2>
       </section>
 
       {/* Summary Grid */}
-      <section className="grid grid-cols-2 gap-4">
-        {/* Card 1: This Month */}
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm flex flex-col justify-between h-32">
+      <section className="grid grid-cols-2" style={{ gap: 'var(--space-4)' }}>
+        <div className="card flex flex-col justify-between" style={{ height: '120px', padding: 'var(--space-4)' }}>
           <div className="flex items-center justify-between">
-            <p className="text-meta text-text-muted">This Month</p>
-            {isUp ? (
-              <TrendingUp size={16} className="text-success" />
-            ) : (
-              <TrendingDown size={16} className="text-error" />
-            )}
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>This Month</p>
+            {isUp ? <TrendingUp size={16} color="var(--color-success)" /> : <TrendingDown size={16} color="var(--color-error)" />}
           </div>
           <div>
-            <p className="text-[22px] font-bold text-text-primary">
-              {formatPKR(data.summary.thisMonthTotal)}
-            </p>
-            <p className={`text-[12px] font-medium ${isUp ? 'text-success' : 'text-error'}`}>
-              {isUp ? '+' : ''}{data.summary.changePercent}% vs last month
+            <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>{formatPKR(data.summary.thisMonthTotal)}</p>
+            <p style={{ fontSize: '12px', fontWeight: 500, color: isUp ? 'var(--color-success)' : 'var(--color-error)' }}>
+              {isUp ? '+' : ''}{data.summary.changePercent}%
             </p>
           </div>
         </div>
 
-        {/* Card 2: Total Given */}
-        <div className="bg-white p-4 rounded-xl border border-border shadow-sm flex flex-col justify-between h-32">
+        <div className="card flex flex-col justify-between" style={{ height: '120px', padding: 'var(--space-4)' }}>
           <div className="flex items-center justify-between">
-            <p className="text-meta text-text-muted">Total Given</p>
-            <CreditCard size={16} className="text-primary" />
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Total Given</p>
+            <CreditCard size={16} color="var(--color-primary)" />
           </div>
           <div>
-            <p className="text-[22px] font-bold text-text-primary">
-              {formatPKR(data.summary.allTimeTotal)}
-            </p>
-            <p className="text-[12px] font-medium text-text-muted">
-              All time record
-            </p>
+            <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>{formatPKR(data.summary.allTimeTotal)}</p>
+            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-muted)' }}>All time</p>
           </div>
         </div>
       </section>
 
-      {/* Realtime Notification Banner */}
+      {/* Realtime Notification */}
       {realtimeNotify && (
-        <div className="bg-primary-light text-primary text-meta px-4 py-2.5 rounded-lg shadow-sm border border-primary/10 flex items-center gap-2 animate-toast-in">
+        <div style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', fontSize: '13px', padding: '10px 16px', borderRadius: 'var(--border-radius)', border: '1px solid var(--color-primary)' }} className="flex items-center gap-2 animate-toast-in">
           <RefreshCw size={14} className="animate-spin" />
-          <span>New transaction added by partner</span>
+          <span>New transaction added</span>
         </div>
       )}
 
-      {/* Recent Transactions List */}
-      <section className="space-y-4">
+      {/* Transactions */}
+      <section style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
         <div className="flex items-center justify-between">
-          <h3 className="text-section-heading text-text-primary">Recent Transactions</h3>
+          <h3 className="text-section-heading text-text-primary">Recent</h3>
           <button
             onClick={() => router.push('/history')}
             className="text-primary text-[12px] font-semibold hover:underline bg-transparent border-none cursor-pointer"
@@ -176,7 +146,7 @@ export default function DashboardPage() {
         </div>
 
         {data.recentTransactions.length > 0 ? (
-          <div className="space-y-3">
+          <div style={{ gap: 'var(--space-3)', display: 'flex', flexDirection: 'column' }}>
             {data.recentTransactions.map((txn) => (
               <TransactionCard
                 key={txn.id}
@@ -187,22 +157,19 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="card p-8 text-center border-dashed border-2 flex flex-col items-center justify-center gap-2">
-            <p className="text-[15px] font-medium text-text-primary">No transactions logged yet</p>
-            <p className="text-meta text-text-muted px-4">
-              Tap the plus button below to log your first shared expense.
-            </p>
+          <div className="card p-8 text-center border-dashed border-2 flex flex-col items-center gap-2">
+            <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>No transactions yet</p>
           </div>
         )}
       </section>
 
-      {/* Informational Banner */}
-      <section className="bg-primary rounded-xl p-4 text-white relative overflow-hidden flex flex-col gap-1 shadow-sm">
-        <h4 className="text-card-title text-white font-semibold flex items-center gap-1.5">
+      {/* Info Banner */}
+      <section style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: 'var(--border-radius)', padding: 'var(--space-4)' }} className="shadow-sm">
+        <h4 style={{ fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Shield size={16} /> Shared Wallet Security
         </h4>
-        <p className="text-[13px] text-white/95 leading-relaxed pr-8">
-          Your financial logs are synchronized instantly between Dad and Mom&apos;s devices.
+        <p style={{ fontSize: '13px', marginTop: '4px', opacity: 0.9 }}>
+          Your financial logs are synchronized instantly.
         </p>
       </section>
     </div>

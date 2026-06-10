@@ -4,14 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { showToast } from '@/lib/toast'
-import { 
-  User, 
-  LogOut, 
-  UserCheck, 
-  Copy,
-  Check
-} from 'lucide-react'
+import { User, LogOut, UserCheck, Copy, Check } from 'lucide-react'
 
+/**
+ * Hallmark · macrostructure: Workbench · tone: Utilitarian+Warm · anchor hue: blue
+ * Last build: none (new session)
+ */
 export default function SettingsPage() {
   const router = useRouter()
   const [data, setData] = useState<any>(null)
@@ -29,7 +27,6 @@ export default function SettingsPage() {
         setData(json)
         setDisplayName(json.profile.display_name)
       } catch (err) {
-        console.error(err)
         showToast("Couldn't load settings.", 'error')
       } finally {
         setLoading(false)
@@ -80,22 +77,22 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="page-content pt-4 pb-24 space-y-6">
-      <h2 className="text-page-title text-text-primary">Settings</h2>
+    <div className="page-content pt-4 pb-24 space-y-8">
+      <h2 className="text-page-title" style={{ color: 'var(--color-text)' }}>Settings</h2>
 
-      {/* Profile Section */}
+      {/* Account Section */}
       <section className="space-y-3">
-        <h3 className="text-section-heading text-text-muted px-1 uppercase tracking-wider text-[13px]">Account</h3>
-        <div className="card p-4 space-y-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-meta text-text-muted flex items-center gap-1.5">
+        <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: 'var(--space-1)' }}>Account</h3>
+        <div className="card p-4" style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
+            <label className="flex items-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', gap: 'var(--space-1)' }}>
               <User size={16} /> Display Name
             </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="input w-full"
+              className="input"
             />
           </div>
           <button
@@ -110,32 +107,33 @@ export default function SettingsPage() {
 
       {/* Household Section */}
       <section className="space-y-3">
-        <h3 className="text-section-heading text-text-muted px-1 uppercase tracking-wider text-[13px]">Family Wallet</h3>
-        <div className="card p-4 space-y-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-meta text-text-muted">Invite Code</span>
-            <div className="flex items-center justify-between bg-gray-50 border border-border p-3 rounded-xl">
-              <span className="text-lg font-bold tracking-widest text-primary">
+        <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: 'var(--space-1)' }}>Family Wallet</h3>
+        <div className="card p-4" style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Invite Code</span>
+            <div className="flex items-center justify-between" style={{ padding: 'var(--space-3)', borderRadius: 'var(--border-radius)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
+              <span style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--color-primary)' }}>
                 {data.household.invite_code}
               </span>
               <button 
                 onClick={copyInviteCode}
-                className="p-2 text-text-muted hover:text-primary transition-colors"
+                style={{ color: 'var(--color-text-muted)', backgroundColor: 'transparent', padding: 'var(--space-1)' }}
+                className="transition-colors hover:text-[var(--color-primary)]"
               >
-                {copied ? <Check size={20} className="text-success" /> : <Copy size={20} />}
+                {copied ? <Check size={20} style={{ color: 'var(--color-success)' }} /> : <Copy size={20} />}
               </button>
             </div>
           </div>
           
-          <div className="flex items-center gap-3 pt-2">
-            <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-primary">
+          <div className="flex items-center" style={{ gap: 'var(--space-3)', paddingTop: 'var(--space-1)' }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
               <UserCheck size={20} />
             </div>
             <div>
-              <p className="text-card-title text-text-primary">
+              <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
                 {data.partner ? `${data.partner.display_name} (${data.partner.role})` : 'Partner not joined'}
               </p>
-              <p className="text-meta text-text-muted">Household: {data.household.name}</p>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Household: {data.household.name}</p>
             </div>
           </div>
         </div>
@@ -145,14 +143,21 @@ export default function SettingsPage() {
       <section className="pt-4">
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center justify-center gap-2 h-[52px] rounded-xl border border-error text-error font-semibold active:bg-error/5 transition-colors"
+          className="w-full flex items-center justify-center border transition-colors"
+          style={{ 
+            height: 'var(--btn-height)', 
+            borderRadius: 'var(--border-radius)', 
+            borderColor: 'var(--color-error)', 
+            color: 'var(--color-error)', 
+            fontWeight: 600 
+          }}
         >
-          <LogOut size={18} /> Sign Out
+          <LogOut size={18} style={{ marginRight: '8px' }} /> Sign Out
         </button>
       </section>
       
       {/* Footer Meta */}
-      <footer className="text-center text-meta text-text-muted pt-4">
+      <footer className="text-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', paddingTop: 'var(--space-4)' }}>
         <p>PaisaLog v1.0.0</p>
       </footer>
     </div>

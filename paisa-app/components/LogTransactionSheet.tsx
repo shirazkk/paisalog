@@ -60,6 +60,10 @@ const CATEGORIES = [
   { value: 'other', label: 'Other', bgClass: 'badge-other', activeBorder: 'border-[#1d4ed8]', icon: Package },
 ] as const
 
+/**
+ * Hallmark · component: BottomSheet · genre: editorial · theme: Custom
+ * states: default · entering · leaving · disabled · error
+ */
 export function LogTransactionSheet({
   isOpen,
   onClose,
@@ -145,99 +149,107 @@ export function LogTransactionSheet({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className={`sheet relative max-h-[90vh] overflow-y-auto ${isAnimating ? 'entering' : 'leaving'}`}>
+      <div
+        className={`sheet relative max-h-[90vh] overflow-y-auto ${isAnimating ? 'entering' : 'leaving'}`}
+        style={{
+          borderRadius: 'var(--border-radius-sheet)',
+          backgroundColor: 'var(--color-surface)',
+          boxShadow: 'var(--shadow-sheet)',
+          padding: `var(--space-5) var(--space-4) var(--space-8)`, // Using spacing tokens
+        }}
+      >
         {/* Close Button top right */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 text-text-muted hover:text-text-primary rounded-full hover:bg-bg transition-colors"
+          className="absolute right-4 top-4 p-2 rounded-full transition-colors"
           aria-label="Close sheet"
+          style={{ color: 'var(--color-text-muted)', backgroundColor: 'transparent' }}
         >
           <X size={20} />
         </button>
 
         {/* Drag Handle */}
-        <div className="sheet-handle"></div>
+        <div className="sheet-handle" style={{ backgroundColor: '#d1d5db', borderRadius: '2px' }}></div>
 
         <div className="px-1 pb-safe pt-2">
           {/* Amount Input Section */}
-          <div className="text-center py-4 flex flex-col gap-1">
-            <span className="text-[12px] uppercase tracking-wider font-bold text-text-muted">
+          <div className="text-center py-4 flex flex-col" style={{ gap: 'var(--space-1)' }}>
+            <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: 'var(--color-text-muted)' }}>
               Amount (PKR)
             </span>
-            <div className="flex items-center justify-center gap-1.5">
-              <span className="text-2xl font-bold text-text-primary">PKR</span>
+            <div className="flex items-center justify-center" style={{ gap: 'var(--space-1)' }}>
+              <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--color-text)' }}>PKR</span>
               <input
                 type="number"
                 inputMode="decimal"
                 placeholder="0"
-                className="w-40 bg-transparent border-none text-center text-3xl font-bold text-text-primary outline-none focus:ring-0 p-0"
+                className="w-40 bg-transparent border-none text-center outline-none focus:ring-0 p-0"
+                style={{ fontSize: '28px', fontWeight: 700, color: 'var(--color-text)' }}
                 {...form.register('amount')}
               />
             </div>
             {form.formState.errors.amount && (
-              <p className="error-message text-center">
+              <p className="error-message text-center" style={{ color: 'var(--color-error)' }}>
                 ⚠ {form.formState.errors.amount.message}
               </p>
             )}
           </div>
 
           {/* Direction Toggle */}
-          <div className="flex flex-col gap-1.5 mb-6">
-            <span className="text-[13px] font-semibold text-text-muted">Transaction Flow</span>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col" style={{ gap: 'var(--space-1)', marginBottom: 'var(--space-6)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Transaction Flow</span>
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-3)' }}>
               {/* Dad -> Mom */}
               <button
                 type="button"
                 onClick={() => form.setValue('direction', 'dad_to_mom')}
-                className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-100 ${
-                  selectedDirection === 'dad_to_mom'
-                    ? 'border-primary bg-primary-light text-primary font-bold'
-                    : 'border-border bg-white text-text-muted'
-                }`}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100`}
+                style={{
+                  gap: 'var(--space-2)',
+                  borderColor: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-border)',
+                  backgroundColor: selectedDirection === 'dad_to_mom' ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                  color: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  fontWeight: selectedDirection === 'dad_to_mom' ? 700 : 500
+                }}
               >
-                <div className="flex items-center gap-1.5">
-                  <div className="w-8 h-8 rounded-full bg-dad flex items-center justify-center text-white font-bold text-[13px]">
-                    D
-                  </div>
-                  <ArrowRight size={14} className={selectedDirection === 'dad_to_mom' ? 'text-primary' : 'text-text-muted'} />
-                  <div className="w-8 h-8 rounded-full bg-mom flex items-center justify-center text-white font-bold text-[13px]">
-                    M
-                  </div>
+                <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                  <div className="avatar avatar-dad">D</div>
+                  <ArrowRight size={14} style={{ color: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
+                  <div className="avatar avatar-mom">M</div>
                 </div>
-                <span className="text-[12px] font-semibold">Dad → Mom</span>
+                <span style={{ fontSize: '12px' }}>Dad → Mom</span>
               </button>
 
               {/* Mom -> Dad */}
               <button
                 type="button"
                 onClick={() => form.setValue('direction', 'mom_to_dad')}
-                className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-100 ${
-                  selectedDirection === 'mom_to_dad'
-                    ? 'border-primary bg-primary-light text-primary font-bold'
-                    : 'border-border bg-white text-text-muted'
-                }`}
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100`}
+                style={{
+                  gap: 'var(--space-2)',
+                  borderColor: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-border)',
+                  backgroundColor: selectedDirection === 'mom_to_dad' ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                  color: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  fontWeight: selectedDirection === 'mom_to_dad' ? 700 : 500
+                }}
               >
-                <div className="flex items-center gap-1.5">
-                  <div className="w-8 h-8 rounded-full bg-mom flex items-center justify-center text-white font-bold text-[13px]">
-                    M
-                  </div>
-                  <ArrowRight size={14} className={selectedDirection === 'mom_to_dad' ? 'text-primary' : 'text-text-muted'} />
-                  <div className="w-8 h-8 rounded-full bg-dad flex items-center justify-center text-white font-bold text-[13px]">
-                    D
-                  </div>
+                <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                  <div className="avatar avatar-mom">M</div>
+                  <ArrowRight size={14} style={{ color: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
+                  <div className="avatar avatar-dad">D</div>
                 </div>
-                <span className="text-[12px] font-semibold">Mom → Dad</span>
+                <span style={{ fontSize: '12px' }}>Mom → Dad</span>
               </button>
             </div>
             {form.formState.errors.direction && (
-              <p className="error-message">⚠ {form.formState.errors.direction.message}</p>
+              <p className="error-message" style={{ color: 'var(--color-error)' }}>⚠ {form.formState.errors.direction.message}</p>
             )}
           </div>
 
           {/* Category Grid */}
-          <div className="flex flex-col gap-1.5 mb-6">
-            <span className="text-[13px] font-semibold text-text-muted">Category</span>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col" style={{ gap: 'var(--space-1)', marginBottom: 'var(--space-6)' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Category</span>
+            <div className="grid grid-cols-2" style={{ gap: 'var(--space-3)' }}>
               {CATEGORIES.map((cat) => {
                 const CatIcon = cat.icon
                 const isSelected = selectedCategory === cat.value
@@ -246,46 +258,61 @@ export function LogTransactionSheet({
                     key={cat.value}
                     type="button"
                     onClick={() => form.setValue('category', cat.value)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-100 text-left ${
+                    className={`flex items-center p-3 rounded-xl border-2 transition-all duration-100 text-left ${
                       cat.value === 'other' ? 'col-span-2' : ''
-                    } ${
-                      isSelected
-                        ? `${cat.activeBorder} ${cat.bgClass} font-bold text-text-primary`
-                        : 'border-border bg-white text-text-muted hover:border-text-muted/20'
                     }`}
+                    style={{
+                      gap: 'var(--space-3)',
+                      borderColor: isSelected ? 'var(--color-primary)' : 'var(--color-border)', // Use primary for active border
+                      backgroundColor: isSelected ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                      color: isSelected ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+                      fontWeight: isSelected ? 700 : 500,
+                    }}
                   >
                     <div className="text-current flex items-center justify-center">
-                      <CatIcon size={20} className={isSelected ? 'stroke-[2.5px]' : ''} />
+                      <CatIcon size={20} strokeWidth={isSelected ? 2.5 : 1.5} />
                     </div>
-                    <span className="text-[15px] font-semibold">{cat.label}</span>
+                    <span style={{ fontSize: '15px' }}>{cat.label}</span>
                   </button>
                 )
               })}
             </div>
             {form.formState.errors.category && (
-              <p className="error-message">⚠ {form.formState.errors.category.message}</p>
+              <p className="error-message" style={{ color: 'var(--color-error)' }}>⚠ {form.formState.errors.category.message}</p>
             )}
           </div>
 
           {/* Date and Note Inputs */}
-          <div className="space-y-4 mb-8">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="txn_date" className="label text-[13px] text-text-muted flex items-center gap-1.5">
+          <div style={{ marginBottom: 'var(--space-8)' }}>
+            <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
+              <label htmlFor="txn_date" className="label flex items-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', gap: 'var(--space-1)' }}>
                 <Calendar size={16} /> Transaction Date
               </label>
               <input
                 id="txn_date"
                 type="date"
                 className={`input ${form.formState.errors.txn_date ? 'input-error' : ''}`}
+                style={{
+                  height: 'var(--input-height)',
+                  borderRadius: 'var(--border-radius)',
+                  border: `1.5px solid ${form.formState.errors.txn_date ? 'var(--color-error)' : 'var(--color-border)'}`,
+                  backgroundColor: form.formState.errors.txn_date ? 'var(--color-error-light)' : 'var(--color-surface)',
+                  padding: `0 var(--space-4)`,
+                  fontFamily: 'var(--font-family)',
+                  fontSize: '15px',
+                  color: 'var(--color-text)',
+                  width: '100%',
+                  outline: 'none',
+                }}
                 {...form.register('txn_date')}
               />
               {form.formState.errors.txn_date && (
-                <p className="error-message">⚠ {form.formState.errors.txn_date.message}</p>
+                <p className="error-message" style={{ color: 'var(--color-error)' }}>⚠ {form.formState.errors.txn_date.message}</p>
               )}
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="note" className="label text-[13px] text-text-muted flex items-center gap-1.5">
+            <div className="flex flex-col mt-4" style={{ gap: 'var(--space-1)' }}>
+              <label htmlFor="note" className="label flex items-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', gap: 'var(--space-1)' }}>
                 <FileText size={16} /> Note (Optional)
               </label>
               <input
@@ -294,10 +321,22 @@ export function LogTransactionSheet({
                 placeholder="What was this for?"
                 maxLength={200}
                 className={`input ${form.formState.errors.note ? 'input-error' : ''}`}
+                style={{
+                  height: 'var(--input-height)',
+                  borderRadius: 'var(--border-radius)',
+                  border: `1.5px solid ${form.formState.errors.note ? 'var(--color-error)' : 'var(--color-border)'}`,
+                  backgroundColor: form.formState.errors.note ? 'var(--color-error-light)' : 'var(--color-surface)',
+                  padding: `0 var(--space-4)`,
+                  fontFamily: 'var(--font-family)',
+                  fontSize: '15px',
+                  color: 'var(--color-text)',
+                  width: '100%',
+                  outline: 'none',
+                }}
                 {...form.register('note')}
               />
               {form.formState.errors.note && (
-                <p className="error-message">⚠ {form.formState.errors.note.message}</p>
+                <p className="error-message" style={{ color: 'var(--color-error)' }}>⚠ {form.formState.errors.note.message}</p>
               )}
             </div>
           </div>
@@ -309,6 +348,18 @@ export function LogTransactionSheet({
               disabled={form.formState.isSubmitting}
               onClick={form.handleSubmit(onSubmit)}
               className="btn btn-primary"
+              style={{
+                height: 'var(--btn-height)',
+                borderRadius: 'var(--border-radius)',
+                backgroundColor: 'var(--color-primary)',
+                color: '#ffffff',
+                fontFamily: 'var(--font-family)',
+                fontSize: '15px',
+                fontWeight: 600,
+                width: '100%',
+                opacity: form.formState.isSubmitting ? 0.5 : 1,
+                cursor: form.formState.isSubmitting ? 'not-allowed' : 'pointer',
+              }}
             >
               {form.formState.isSubmitting ? 'Saving...' : 'Save Transaction'}
             </button>

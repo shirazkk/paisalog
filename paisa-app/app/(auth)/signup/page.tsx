@@ -1,35 +1,42 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { supabase } from '@/lib/supabase/client'
-import { showToast } from '@/lib/toast'
-import { Eye, EyeOff, Wallet } from 'lucide-react'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { supabase } from "@/lib/supabase/client";
+import { showToast } from "@/lib/toast";
+import { Eye, EyeOff, Wallet } from "lucide-react";
 
 const signupSchema = z.object({
-  displayName: z.string().min(1, 'Display name is required.').max(50, 'Max 50 characters.'),
-  email: z.string().min(1, 'Email is required.').email('Please enter a valid email.'),
-  password: z.string().min(8, 'Password must be at least 8 characters.'),
-})
+  displayName: z
+    .string()
+    .min(1, "Display name is required.")
+    .max(50, "Max 50 characters."),
+  email: z
+    .string()
+    .min(1, "Email is required.")
+    .email("Please enter a valid email."),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+});
 
-type SignupFormValues = z.infer<typeof signupSchema>
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      displayName: '',
-      email: '',
-      password: '',
+      displayName: "",
+      email: "",
+      password: "",
     },
-  })
+  });
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
@@ -39,141 +46,394 @@ export default function SignupPage() {
         options: {
           data: {
             display_name: values.displayName,
-            role: 'dad',
+            role: "dad",
           },
         },
-      })
+      });
 
       if (error) {
-        showToast(error.message, 'error')
-        return
+        showToast(error.message, "error");
+        return;
       }
 
       if (data.user) {
-        showToast('Account created successfully ✓', 'success')
-        router.push('/join-household')
-        router.refresh()
+        showToast("Account created successfully ✓", "success");
+        router.push("/join-household");
+        router.refresh();
       }
     } catch (err) {
-      console.error('[Signup Error]', err)
-      showToast("Couldn't create account. Please try again.", 'error')
+      showToast("Couldn't create account. Please try again.", "error");
     }
-  }
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg p-page-margin">
-      {/* Header Section */}
-      <header className="flex flex-col items-center text-center mt-section-gap mb-section-gap">
-        <div className="w-16 h-16 rounded-xl bg-primary-light text-primary flex items-center justify-center mb-4">
-          <Wallet size={32} />
-        </div>
-        <h1 className="text-page-title text-text-primary">PaisaLog</h1>
-        <p className="text-body text-text-muted mt-1">Simplify your family's shared expenses.</p>
-      </header>
+    <div
+      style={{
+        backgroundColor: "#f9fafb",
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
+      <main
+        style={{
+          maxWidth: "480px",
+          margin: "0 auto",
+          width: "100%",
+          minHeight: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          padding: "0 16px 32px",
+        }}
+      >
+        {/* Header */}
+        <header
+          style={{
+            marginTop: "24px",
+            marginBottom: "32px",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
+            <div
+              style={{
+                width: "64px",
+                height: "64px",
+                borderRadius: "12px",
+                backgroundColor: "#1a56db",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+              }}
+            >
+              <Wallet size={32} />
+            </div>
+          </div>
+          <h1
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              lineHeight: 1.2,
+              color: "#111827",
+              marginBottom: "4px",
+            }}
+          >
+            PaisaLog
+          </h1>
+          <p
+            style={{
+              fontSize: "13px",
+              lineHeight: 1.4,
+              color: "#6b7280",
+            }}
+          >
+            Simplify your family's shared expenses.
+          </p>
+        </header>
 
-      {/* Main Illustration Section (Placeholder matching layout) */}
-      <div className="w-full max-w-[280px] mx-auto mb-section-gap">
-        <div className="w-full h-40 bg-gray-100 rounded-xl flex items-center justify-center text-text-muted">
-           [Illustration Placeholder]
+        {/* Hero Image */}
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "160px",
+            borderRadius: "12px",
+            overflow: "hidden",
+            marginBottom: "24px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.10)",
+          }}
+        >
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOteXYZ7YCkm9F06E5NlIx3sfCprsracInFup79MQ2tUi0Y2HsQYI00C4wukHd7qneKTmdMhKyOSi0RVTExuQvg7Qnfi-Yrwu1MqSg7qN_bnDSzlXOEYO-y9YuBZXUnvkhF7dUxISSo1fp3PZzzksLQaSAcQLayzvBRg0a0j2COkIBAdhi8-2Cj-5HyYBngoEIrJtywFS9C-Zbqhui1Wq8clSqeBO7h-25X0wGN7O01K2w9KBbmMDW_0PoQZDyGYtVV5zUy3zyV5M"
+            alt="Clean workspace with laptop and financial notebook"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.20), transparent)",
+            }}
+          />
         </div>
-      </div>
 
-      {/* Sign Up Form */}
-      <main className="flex-grow">
-        <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+        {/* Form */}
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+        >
           {/* Display Name */}
-          <div className="flex flex-col gap-1">
-            <label className="text-meta text-text-muted transition-colors">Display Name</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              htmlFor="displayName"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                color: focusedField === "displayName" ? "#1a56db" : "#434654",
+                paddingLeft: "4px",
+                transition: "color 0.15s",
+              }}
+            >
+              Display Name
+            </label>
             <input
+              id="displayName"
               type="text"
-              placeholder="Enter your name"
-              className={`input ${form.formState.errors.displayName ? 'input-error' : ''}`}
-              {...form.register('displayName')}
+              placeholder="John Doe"
+              {...form.register("displayName")}
+              onFocus={() => setFocusedField("displayName")}
+              onBlur={() => setFocusedField(null)}
+              style={{
+                height: "52px",
+                width: "100%",
+                padding: "0 16px",
+                borderRadius: "12px",
+                border: form.formState.errors.displayName
+                  ? "1.5px solid #dc2626"
+                  : focusedField === "displayName"
+                  ? "1.5px solid #1a56db"
+                  : "1.5px solid #e5e7eb",
+                backgroundColor: "#ffffff",
+                fontSize: "15px",
+                color: "#111827",
+                outline: "none",
+                boxShadow:
+                  focusedField === "displayName"
+                    ? "0 0 0 2px rgba(26, 86, 219, 0.10)"
+                    : "none",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+                boxSizing: "border-box",
+              }}
             />
             {form.formState.errors.displayName && (
-              <p className="error-message flex items-center gap-1">
-                <span className="text-error">⚠</span>
-                {form.formState.errors.displayName.message}
+              <p style={{ fontSize: "13px", color: "#dc2626", paddingLeft: "4px" }}>
+                ⚠ {form.formState.errors.displayName.message}
               </p>
             )}
           </div>
 
           {/* Email */}
-          <div className="flex flex-col gap-1">
-            <label className="text-meta text-text-muted transition-colors">Email Address</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              htmlFor="email"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                color: focusedField === "email" ? "#1a56db" : "#434654",
+                paddingLeft: "4px",
+                transition: "color 0.15s",
+              }}
+            >
+              Email Address
+            </label>
             <input
+              id="email"
               type="email"
               placeholder="name@example.com"
-              className={`input ${form.formState.errors.email ? 'input-error' : ''}`}
-              {...form.register('email')}
+              {...form.register("email")}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
+              style={{
+                height: "52px",
+                width: "100%",
+                padding: "0 16px",
+                borderRadius: "12px",
+                border: form.formState.errors.email
+                  ? "1.5px solid #dc2626"
+                  : focusedField === "email"
+                  ? "1.5px solid #1a56db"
+                  : "1.5px solid #e5e7eb",
+                backgroundColor: "#ffffff",
+                fontSize: "15px",
+                color: "#111827",
+                outline: "none",
+                boxShadow:
+                  focusedField === "email"
+                    ? "0 0 0 2px rgba(26, 86, 219, 0.10)"
+                    : "none",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+                boxSizing: "border-box",
+              }}
             />
             {form.formState.errors.email && (
-              <p className="error-message flex items-center gap-1">
-                <span className="text-error">⚠</span>
-                {form.formState.errors.email.message}
+              <p style={{ fontSize: "13px", color: "#dc2626", paddingLeft: "4px" }}>
+                ⚠ {form.formState.errors.email.message}
               </p>
             )}
           </div>
 
           {/* Password */}
-          <div className="flex flex-col gap-1 relative">
-            <label className="text-meta text-text-muted transition-colors">Password</label>
-            <div className="relative">
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              htmlFor="password"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                color: focusedField === "password" ? "#1a56db" : "#434654",
+                paddingLeft: "4px",
+                transition: "color 0.15s",
+              }}
+            >
+              Password
+            </label>
+            <div style={{ position: "relative" }}>
               <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                className={`input pr-12 ${form.formState.errors.password ? 'input-error' : ''}`}
-                {...form.register('password')}
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Min. 8 characters"
+                {...form.register("password")}
+                onFocus={() => setFocusedField("password")}
+                onBlur={() => setFocusedField(null)}
+                style={{
+                  height: "52px",
+                  width: "100%",
+                  padding: "0 48px 0 16px",
+                  borderRadius: "12px",
+                  border: form.formState.errors.password
+                    ? "1.5px solid #dc2626"
+                    : focusedField === "password"
+                    ? "1.5px solid #1a56db"
+                    : "1.5px solid #e5e7eb",
+                  backgroundColor: "#ffffff",
+                  fontSize: "15px",
+                  color: "#111827",
+                  outline: "none",
+                  boxShadow:
+                    focusedField === "password"
+                      ? "0 0 0 2px rgba(26, 86, 219, 0.10)"
+                      : "none",
+                  transition: "border-color 0.2s, box-shadow 0.2s",
+                  boxSizing: "border-box",
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                style={{
+                  position: "absolute",
+                  right: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#434654",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 0,
+                }}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             {form.formState.errors.password && (
-              <p className="error-message flex items-center gap-1">
-                <span className="text-error">⚠</span>
-                {form.formState.errors.password.message}
+              <p style={{ fontSize: "13px", color: "#dc2626", paddingLeft: "4px" }}>
+                ⚠ {form.formState.errors.password.message}
               </p>
             )}
           </div>
 
-          {/* Create Account Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={form.formState.isSubmitting}
-            className="btn btn-primary mt-6 disabled:opacity-50"
+            style={{
+              marginTop: "12px",
+              height: "52px",
+              width: "100%",
+              backgroundColor: form.formState.isSubmitting ? "#6b7280" : "#1a56db",
+              color: "#ffffff",
+              fontSize: "18px",
+              fontWeight: 600,
+              lineHeight: 1.3,
+              borderRadius: "12px",
+              border: "none",
+              cursor: form.formState.isSubmitting ? "not-allowed" : "pointer",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.10)",
+              transition: "opacity 0.15s, transform 0.15s, background-color 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!form.formState.isSubmitting)
+                (e.currentTarget as HTMLButtonElement).style.opacity = "0.90";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+            }}
+            onMouseDown={(e) => {
+              if (!form.formState.isSubmitting)
+                (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.98)";
+            }}
+            onMouseUp={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+            }}
           >
-            {form.formState.isSubmitting ? 'Creating account...' : 'Create Account'}
+            {form.formState.isSubmitting ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
-        {/* Terms & Privacy */}
-        <p className="mt-4 text-meta text-text-muted text-center leading-relaxed">
-          By creating an account, you agree to our{' '}
-          <Link className="text-primary font-semibold hover:underline" href="/terms">
+        {/* Terms */}
+        <p
+          style={{
+            marginTop: "16px",
+            textAlign: "center",
+            fontSize: "13px",
+            lineHeight: 1.6,
+            color: "#6b7280",
+            padding: "0 24px",
+          }}
+        >
+          By creating an account, you agree to our{" "}
+          <a href="#" style={{ color: "#003fb1", fontWeight: 500 }}>
             Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link className="text-primary font-semibold hover:underline" href="/privacy">
+          </a>{" "}
+          and{" "}
+          <a href="#" style={{ color: "#003fb1", fontWeight: 500 }}>
             Privacy Policy
-          </Link>
+          </a>
           .
         </p>
 
-        {/* Navigation Footer */}
-        <div className="text-center mt-section-gap">
-          <p className="text-body text-text-muted">
-            Already have an account?{' '}
-            <Link className="text-primary font-semibold hover:underline" href="/login">
+        {/* Footer */}
+        <footer
+          style={{
+            marginTop: "auto",
+            paddingTop: "32px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "13px", color: "#434654" }}>
+              Already have an account?
+            </span>
+            <Link
+              href="/login"
+              style={{
+                fontSize: "16px",
+                fontWeight: 600,
+                color: "#003fb1",
+                textDecoration: "none",
+              }}
+            >
               Log in
             </Link>
-          </p>
-        </div>
+          </div>
+          {/* Subtle branding dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", opacity: 0.3, marginTop: "8px" }}>
+            <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#434654" }} />
+            <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#434654" }} />
+            <div style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#434654" }} />
+          </div>
+        </footer>
       </main>
     </div>
-  )
+  );
 }
