@@ -20,6 +20,9 @@ const signupSchema = z.object({
     .min(1, "Email is required.")
     .email("Please enter a valid email."),
   password: z.string().min(8, "Password must be at least 8 characters."),
+  role: z.enum(["dad", "mom"], {
+    message: "Please select your role.",
+  }),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -35,6 +38,7 @@ export default function SignupPage() {
       displayName: "",
       email: "",
       password: "",
+      role: "dad",
     },
   });
 
@@ -46,7 +50,7 @@ export default function SignupPage() {
         options: {
           data: {
             display_name: values.displayName,
-            role: "dad",
+            role: values.role,
           },
         },
       });
@@ -214,6 +218,59 @@ export default function SignupPage() {
                 ⚠ {form.formState.errors.displayName.message}
               </p>
             )}
+          </div>
+
+          {/* Role Selection */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <label
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                color: "#434654",
+                paddingLeft: "4px",
+              }}
+            >
+              Who are you?
+            </label>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                type="button"
+                onClick={() => form.setValue("role", "dad")}
+                style={{
+                  flex: 1,
+                  height: "52px",
+                  borderRadius: "12px",
+                  border: form.watch("role") === "dad" ? "2px solid #1a56db" : "1.5px solid #e5e7eb",
+                  backgroundColor: form.watch("role") === "dad" ? "#f0f7ff" : "#ffffff",
+                  color: form.watch("role") === "dad" ? "#1a56db" : "#434654",
+                  fontWeight: form.watch("role") === "dad" ? 600 : 400,
+                  fontSize: "15px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                Dad
+              </button>
+              <button
+                type="button"
+                onClick={() => form.setValue("role", "mom")}
+                style={{
+                  flex: 1,
+                  height: "52px",
+                  borderRadius: "12px",
+                  border: form.watch("role") === "mom" ? "2px solid #1a56db" : "1.5px solid #e5e7eb",
+                  backgroundColor: form.watch("role") === "mom" ? "#f0f7ff" : "#ffffff",
+                  color: form.watch("role") === "mom" ? "#1a56db" : "#434654",
+                  fontWeight: form.watch("role") === "mom" ? 600 : 400,
+                  fontSize: "15px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                Mom
+              </button>
+            </div>
           </div>
 
           {/* Email */}

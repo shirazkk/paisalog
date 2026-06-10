@@ -84,3 +84,4 @@ export function TransactionCard({ transaction, members, onClick }: TransactionCa
     </div>
   )
 }
+

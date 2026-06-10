@@ -116,8 +116,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         profile: {
+          id: userId,
           displayName: profile.display_name,
           role: profile.role,
+          householdId: profile.household_id,
         },
         summary: {
           thisMonthTotal,

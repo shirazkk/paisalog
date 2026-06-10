@@ -195,55 +195,50 @@ export function LogTransactionSheet({
             )}
           </div>
 
-          {/* Direction Toggle */}
+          {/* Direction Toggle - Restricted based on role */}
           <div className="flex flex-col" style={{ gap: 'var(--space-1)', marginBottom: 'var(--space-6)' }}>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Transaction Flow</span>
-            <div className="grid grid-cols-2" style={{ gap: 'var(--space-3)' }}>
-              {/* Dad -> Mom */}
-              <button
-                type="button"
-                onClick={() => form.setValue('direction', 'dad_to_mom')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100`}
-                style={{
-                  gap: 'var(--space-2)',
-                  borderColor: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-border)',
-                  backgroundColor: selectedDirection === 'dad_to_mom' ? 'var(--color-primary-light)' : 'var(--color-surface)',
-                  color: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  fontWeight: selectedDirection === 'dad_to_mom' ? 700 : 500
-                }}
-              >
-                <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
-                  <div className="avatar avatar-dad">D</div>
-                  <ArrowRight size={14} style={{ color: selectedDirection === 'dad_to_mom' ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
-                  <div className="avatar avatar-mom">M</div>
+            <div className="grid grid-cols-1" style={{ gap: 'var(--space-3)' }}>
+              {currentUserProfile?.role === 'dad' ? (
+                /* Dad -> Mom (Fixed for Dad) */
+                <div
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100"
+                  style={{
+                    gap: 'var(--space-2)',
+                    borderColor: 'var(--color-primary)',
+                    backgroundColor: 'var(--color-primary-light)',
+                    color: 'var(--color-primary)',
+                    fontWeight: 700
+                  }}
+                >
+                  <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                    <div className="avatar avatar-dad">D</div>
+                    <ArrowRight size={14} style={{ color: 'var(--color-primary)' }} />
+                    <div className="avatar avatar-mom">M</div>
+                  </div>
+                  <span style={{ fontSize: '12px' }}>Dad → Mom</span>
                 </div>
-                <span style={{ fontSize: '12px' }}>Dad → Mom</span>
-              </button>
-
-              {/* Mom -> Dad */}
-              <button
-                type="button"
-                onClick={() => form.setValue('direction', 'mom_to_dad')}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100`}
-                style={{
-                  gap: 'var(--space-2)',
-                  borderColor: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-border)',
-                  backgroundColor: selectedDirection === 'mom_to_dad' ? 'var(--color-primary-light)' : 'var(--color-surface)',
-                  color: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  fontWeight: selectedDirection === 'mom_to_dad' ? 700 : 500
-                }}
-              >
-                <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
-                  <div className="avatar avatar-mom">M</div>
-                  <ArrowRight size={14} style={{ color: selectedDirection === 'mom_to_dad' ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
-                  <div className="avatar avatar-dad">D</div>
+              ) : (
+                /* Mom -> Dad (Fixed for Mom) */
+                <div
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-100"
+                  style={{
+                    gap: 'var(--space-2)',
+                    borderColor: 'var(--color-primary)',
+                    backgroundColor: 'var(--color-primary-light)',
+                    color: 'var(--color-primary)',
+                    fontWeight: 700
+                  }}
+                >
+                  <div className="flex items-center" style={{ gap: 'var(--space-1)' }}>
+                    <div className="avatar avatar-mom">M</div>
+                    <ArrowRight size={14} style={{ color: 'var(--color-primary)' }} />
+                    <div className="avatar avatar-dad">D</div>
+                  </div>
+                  <span style={{ fontSize: '12px' }}>Mom → Dad</span>
                 </div>
-                <span style={{ fontSize: '12px' }}>Mom → Dad</span>
-              </button>
+              )}
             </div>
-            {form.formState.errors.direction && (
-              <p className="error-message" style={{ color: 'var(--color-error)' }}>⚠ {form.formState.errors.direction.message}</p>
-            )}
           </div>
 
           {/* Category Grid */}

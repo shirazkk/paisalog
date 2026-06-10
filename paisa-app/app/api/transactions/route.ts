@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
     }
     const userId = user.id;
 
-    // 2. Fetch user's profile to get household_id
+    // 2. Fetch user's profile to get household_id and role
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("household_id")
+      .select("household_id, role")
       .eq("id", userId)
       .single();
 
@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     const householdId = profile.household_id;
+    const userRole = profile.role;
 
     // 3. Parse and validate body
     const body = await request.json();
@@ -79,7 +80,21 @@ export async function POST(request: NextRequest) {
 
     const validated = result.data;
 
-    // 4. Fetch the household members (must have both Dad and Mom profiles)
+    // 4. Enforce role-based direction
+    if (userRole === "dad" && validated.direction !== "dad_to_mom") {
+      return NextResponse.json(
+        { error: "Dad can only log transactions from Dad to Mom." },
+        { status: 403 },
+      );
+    }
+    if (userRole === "mom" && validated.direction !== "mom_to_dad") {
+      return NextResponse.json(
+        { error: "Mom can only log transactions from Mom to Dad." },
+        { status: 403 },
+      );
+    }
+
+    // 5. Fetch the household members (must have both Dad and Mom profiles)
     const { data: members, error: membersError } = await supabase
       .from("profiles")
       .select("id, role")

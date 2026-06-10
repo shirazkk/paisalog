@@ -8,10 +8,6 @@ interface DashboardNavigationProps {
   onLogClick: () => void;
 }
 
-/**
- * Hallmark · component: Nav · genre: editorial · theme: Custom
- * states: default · hover · active
- */
 export function DashboardNavigation({ onLogClick }: DashboardNavigationProps) {
   const pathname = usePathname()
 
@@ -47,3 +43,4 @@ export function DashboardNavigation({ onLogClick }: DashboardNavigationProps) {
     </nav>
   )
 }
+

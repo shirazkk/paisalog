@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
 
     if (householdError) throw householdError
 
-    // 5. Link user profile to the household and assign 'dad' role by default
+    // 5. Link user profile to the household
+    // We don't update the role here, we just use whatever role the profile already has (set during signup)
     const { error: profileError } = await supabaseService
       .from('profiles')
       .update({
-        household_id: household.id,
-        role: 'dad'
+        household_id: household.id
       })
       .eq('id', userId)
 

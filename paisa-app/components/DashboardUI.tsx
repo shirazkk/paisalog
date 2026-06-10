@@ -30,3 +30,4 @@ export function DashboardUI({ children, householdId, currentUserProfile }: Dashb
     </>
   );
 }
+

@@ -16,7 +16,7 @@ import { Transaction, Profile } from '@/types'
 export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<{
-    profile: { displayName: string; role: string }
+    profile: { id: string; displayName: string; role: string; householdId: string }
     summary: { thisMonthTotal: number; lastMonthTotal: number; allTimeTotal: number; changePercent: number }
     recentTransactions: Transaction[]
     members: Profile[]
@@ -48,15 +48,20 @@ export default function DashboardPage() {
   }, [fetchSummary])
 
   useRealtimeTransactions({
-    householdId: data?.members[0]?.household_id || '',
+    householdId: data?.profile.householdId || '',
     onNewTransaction: (newTxn) => {
       setData((prev) => {
         if (!prev) return null
         const exists = prev.recentTransactions.some((t) => t.id === newTxn.id)
         if (exists) return prev
         const updatedRecent = [newTxn, ...prev.recentTransactions].slice(0, 5)
-        setRealtimeNotify(true)
-        setTimeout(() => setRealtimeNotify(false), 3000)
+        
+        // Show notification ONLY if someone else added it
+        if (newTxn.logged_by !== prev.profile.id) {
+          setRealtimeNotify(true)
+          setTimeout(() => setRealtimeNotify(false), 3000)
+        }
+        
         fetchSummary()
         return { ...prev, recentTransactions: updatedRecent }
       })
@@ -175,3 +180,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+
