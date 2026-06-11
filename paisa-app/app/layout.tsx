@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toast } from "@/components/Toast";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 export const metadata: Metadata = {
   title: "PaisaLog",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <div className="app-container">
           {children}
           <Toast />
+          <PWAInstallBanner />
         </div>
       </body>
     </html>

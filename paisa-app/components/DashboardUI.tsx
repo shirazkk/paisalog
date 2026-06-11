@@ -17,7 +17,7 @@ export function DashboardUI({ children, householdId, currentUserProfile }: Dashb
   return (
     <>
       {/* Main Canvas content */}
-      <main className="flex-1 pb-20 pt-16 overflow-y-auto">{children}</main>
+      <main>{children}</main>
 
       {/* Navigation and Sheet */}
       <DashboardNavigation onLogClick={() => setIsLogSheetOpen(true)} />

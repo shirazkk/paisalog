@@ -4,12 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { showToast } from '@/lib/toast'
-import { User, LogOut, UserCheck, Copy, Check } from 'lucide-react'
+import { User, LogOut, UserCheck, Copy, Check, Home, Shield } from 'lucide-react'
 
-/**
- * Hallmark · macrostructure: Workbench · tone: Utilitarian+Warm · anchor hue: blue
- * Last build: none (new session)
- */
 export default function SettingsPage() {
   const router = useRouter()
   const [data, setData] = useState<any>(null)
@@ -41,7 +37,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/profiles', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName })
+        body: JSON.stringify({ displayName }),
       })
       if (!res.ok) throw new Error('Failed to update')
       showToast('Profile updated ✓', 'success')
@@ -66,100 +62,280 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="page-content pt-4 space-y-6">
-        <div className="h-6 w-32 skeleton"></div>
-        <div className="space-y-4 pt-4">
-          <div className="h-20 rounded-xl skeleton"></div>
-          <div className="h-20 rounded-xl skeleton"></div>
-        </div>
+      <div
+        className="page-content"
+        style={{ paddingTop: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
+      >
+        <div className="skeleton" style={{ height: '26px', width: '120px', borderRadius: '8px' }} />
+        <div className="skeleton" style={{ height: '140px', borderRadius: '12px' }} />
+        <div className="skeleton" style={{ height: '140px', borderRadius: '12px' }} />
+        <div className="skeleton" style={{ height: '52px', borderRadius: '12px' }} />
       </div>
     )
   }
 
-  return (
-    <div className="page-content pt-4 pb-24 space-y-8">
-      <h2 className="text-page-title" style={{ color: 'var(--color-text)' }}>Settings</h2>
+  if (!data) return null
 
-      {/* Account Section */}
-      <section className="space-y-3">
-        <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: 'var(--space-1)' }}>Account</h3>
-        <div className="card p-4" style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
-          <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
-            <label className="flex items-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', gap: 'var(--space-1)' }}>
-              <User size={16} /> Display Name
+  const isDad = data.profile.role === 'dad'
+  const hasPartner = !!data.partner
+  const nameUnchanged = displayName === data.profile.display_name
+
+  return (
+    <div
+      className="page-content"
+      style={{
+        paddingTop: 'var(--space-6)',
+        paddingBottom: 'calc(var(--nav-height) + var(--space-8))',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-6)',
+      }}
+    >
+      {/* ── Page Title ── */}
+      <h1 className="text-page-title">Settings</h1>
+
+      {/* ── Profile Card ── */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: '2px' }}>
+          Profile
+        </p>
+        <div className="card" style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+
+          {/* Avatar + role row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div
+              className={`avatar ${isDad ? 'avatar-dad' : 'avatar-mom'}`}
+              style={{ width: '44px', height: '44px', fontSize: '16px', borderRadius: '12px' }}
+            >
+              {isDad ? 'D' : 'M'}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
+                {data.profile.display_name}
+              </p>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  padding: '2px 8px',
+                  borderRadius: 'var(--border-radius-pill)',
+                  backgroundColor: isDad ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
+                  color: isDad ? 'var(--color-dad)' : 'var(--color-mom)',
+                  width: 'fit-content',
+                }}
+              >
+                {isDad ? 'Dad' : 'Mom'}
+              </span>
+            </div>
+          </div>
+
+          <div className="card-divider" />
+
+          {/* Name input */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label
+              htmlFor="displayName"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--color-text)' }}
+            >
+              <User size={14} color="var(--color-text-muted)" />
+              Display Name
             </label>
             <input
+              id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="input"
+              placeholder="Enter your name"
             />
           </div>
+
           <button
             onClick={handleUpdateProfile}
-            disabled={isSaving || displayName === data.profile.display_name}
+            disabled={isSaving || nameUnchanged}
             className="btn btn-primary"
           >
-            {isSaving ? 'Saving...' : 'Update Name'}
+            {isSaving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </section>
 
-      {/* Household Section */}
-      <section className="space-y-3">
-        <h3 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', paddingLeft: 'var(--space-1)' }}>Family Wallet</h3>
-        <div className="card p-4" style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
-          <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
-            <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Invite Code</span>
-            <div className="flex items-center justify-between" style={{ padding: 'var(--space-3)', borderRadius: 'var(--border-radius)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
-              <span style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--color-primary)' }}>
-                {data.household.invite_code}
-              </span>
-              <button 
-                onClick={copyInviteCode}
-                style={{ color: 'var(--color-text-muted)', backgroundColor: 'transparent', padding: 'var(--space-1)' }}
-                className="transition-colors hover:text-[var(--color-primary)]"
-              >
-                {copied ? <Check size={20} style={{ color: 'var(--color-success)' }} /> : <Copy size={20} />}
-              </button>
+      {/* ── Household Card ── */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: '2px' }}>
+          Family Wallet
+        </p>
+        <div className="card" style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+
+          {/* Household name row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                backgroundColor: 'var(--color-primary-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Home size={18} color="var(--color-primary)" />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
+                {data.household.name}
+              </p>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Shared household</p>
             </div>
           </div>
-          
-          <div className="flex items-center" style={{ gap: 'var(--space-3)', paddingTop: 'var(--space-1)' }}>
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
-              <UserCheck size={20} />
+
+          <div className="card-divider" />
+
+          {/* Invite code */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text)' }}>Invite Code</p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px var(--space-4)',
+                borderRadius: 'var(--border-radius)',
+                backgroundColor: 'var(--color-primary-light)',
+                border: '1.5px dashed rgba(26, 86, 219, 0.3)',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 700,
+                  letterSpacing: '0.15em',
+                  color: 'var(--color-primary)',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {data.household.invite_code}
+              </span>
+              <button
+                onClick={copyInviteCode}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  backgroundColor: copied ? 'var(--color-success-light)' : 'var(--color-surface)',
+                  border: `1px solid ${copied ? 'var(--color-success)' : 'var(--color-border)'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  transition: 'all 150ms ease',
+                }}
+                aria-label="Copy invite code"
+              >
+                {copied
+                  ? <Check size={16} color="var(--color-success)" />
+                  : <Copy size={16} color="var(--color-text-muted)" />
+                }
+              </button>
             </div>
-            <div>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+              Share this code with your partner to join the household.
+            </p>
+          </div>
+
+          <div className="card-divider" />
+
+          {/* Partner status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                backgroundColor: hasPartner ? 'var(--color-success-light)' : 'var(--color-bg)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <UserCheck size={18} color={hasPartner ? 'var(--color-success)' : 'var(--color-text-muted)'} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
-                {data.partner ? `${data.partner.display_name} (${data.partner.role})` : 'Partner not joined'}
+                {hasPartner ? data.partner.display_name : 'No partner yet'}
               </p>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Household: {data.household.name}</p>
+              <p style={{ fontSize: '12px', color: hasPartner ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
+                {hasPartner ? `${data.partner.role} · Connected` : 'Share the invite code above'}
+              </p>
+            </div>
+
+            {hasPartner && (
+              <div
+                style={{
+                  marginLeft: 'auto',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--color-success)',
+                  flexShrink: 0,
+                }}
+              />
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Security Card ── */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', paddingLeft: '2px' }}>
+          Security
+        </p>
+        <div className="card" style={{ padding: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                backgroundColor: 'var(--color-primary-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Shield size={18} color="var(--color-primary)" />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text)' }}>End-to-end sync</p>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                Your data is encrypted and synced instantly.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Danger Zone */}
-      <section className="pt-4">
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center justify-center border transition-colors"
-          style={{ 
-            height: 'var(--btn-height)', 
-            borderRadius: 'var(--border-radius)', 
-            borderColor: 'var(--color-error)', 
-            color: 'var(--color-error)', 
-            fontWeight: 600 
-          }}
-        >
-          <LogOut size={18} style={{ marginRight: '8px' }} /> Sign Out
-        </button>
-      </section>
-      
-      {/* Footer Meta */}
-      <footer className="text-center" style={{ fontSize: '13px', color: 'var(--color-text-muted)', paddingTop: 'var(--space-4)' }}>
-        <p>PaisaLog v1.0.0</p>
-      </footer>
+      {/* ── Sign Out ── */}
+      <button
+        onClick={handleSignOut}
+        className="btn btn-destructive"
+        style={{ marginTop: 'var(--space-2)' }}
+      >
+        <LogOut size={18} />
+        Sign Out
+      </button>
+
+      {/* ── Footer ── */}
+      <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--color-text-muted)', paddingTop: 'var(--space-2)' }}>
+        PaisaLog v1.0.0
+      </p>
     </div>
   )
 }

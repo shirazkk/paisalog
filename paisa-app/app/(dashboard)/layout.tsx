@@ -33,27 +33,51 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="app-container relative bg-bg flex flex-col min-h-screen">
-      <header className=" fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-120 z-40 flex items-center justify-between px-4 h-14 border-b border-border">
-        <div className="flex items-center gap-2">
-          <h1 className="text-[18px] font-extrabold text-primary tracking-tight">
-            PaisaLog
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <div
-            className={`avatar w-8 h-8 text-[12px] ${
-              profile.role === "dad" ? "avatar-dad" : "avatar-mom"
-            }`}
-          >
-            {profile.role === "dad" ? "D" : "M"}
-          </div>
+    <div className="app-container relative flex flex-col min-h-screen">
+      {/* Fixed header — h-14 = 56px */}
+      <header
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: '480px',
+          height: '56px',
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 var(--space-4)',
+          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '18px',
+            fontWeight: 800,
+            color: 'var(--color-primary)',
+            letterSpacing: '-0.4px',
+          }}
+        >
+          PaisaLog
+        </h1>
+
+        <div
+          className={`avatar ${profile.role === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}
+          style={{ fontSize: '12px' }}
+        >
+          {profile.role === 'dad' ? 'D' : 'M'}
         </div>
       </header>
 
-      <DashboardUI householdId={profile.household_id} currentUserProfile={profile}>
-        {children}
-      </DashboardUI>
+      {/* Push content below the fixed header */}
+      <div style={{ paddingTop: '56px', flex: 1 }}>
+        <DashboardUI householdId={profile.household_id} currentUserProfile={profile}>
+          {children}
+        </DashboardUI>
+      </div>
     </div>
   );
 }

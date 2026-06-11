@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, History, Settings, PlusCircle } from 'lucide-react'
+import { Home, History, Settings, Plus, BookOpen } from 'lucide-react'
 
 interface DashboardNavigationProps {
   onLogClick: () => void;
@@ -11,36 +11,102 @@ interface DashboardNavigationProps {
 export function DashboardNavigation({ onLogClick }: DashboardNavigationProps) {
   const pathname = usePathname()
 
-  const isActive = (path: string) => pathname === path || (path === '/history' && pathname.startsWith('/history'))
+  const isActive = (path: string) =>
+    pathname === path || (path === '/history' && pathname.startsWith('/history'))
 
   return (
-    <nav className="bottom-nav" style={{ 
-      borderTop: '1px solid var(--color-border)',
-      backgroundColor: 'var(--color-surface)'
-    }}>
+    <nav
+      className="bottom-nav"
+      style={{
+        borderTop: '1px solid var(--color-border)',
+        backgroundColor: 'var(--color-surface)',
+        overflow: 'visible',
+      }}
+    >
+      {/* Home */}
       <Link href="/dashboard" className={`nav-tab ${isActive('/dashboard') ? 'active' : ''}`}>
         <Home size={22} strokeWidth={isActive('/dashboard') ? 2.5 : 1.5} />
-        <span style={{ fontSize: '11px', fontWeight: isActive('/dashboard') ? 600 : 500 }}>Home</span>
+        <span style={{ fontSize: '11px', fontWeight: isActive('/dashboard') ? 600 : 500 }}>
+          Home
+        </span>
       </Link>
-      
-      <button
-        onClick={onLogClick}
-        className="nav-tab border-none bg-transparent"
-        style={{ color: 'var(--color-primary)' }}
-      >
-        <PlusCircle size={28} strokeWidth={2} />
-      </button>
 
+      {/* History */}
       <Link href="/history" className={`nav-tab ${isActive('/history') ? 'active' : ''}`}>
         <History size={22} strokeWidth={isActive('/history') ? 2.5 : 1.5} />
-        <span style={{ fontSize: '11px', fontWeight: isActive('/history') ? 600 : 500 }}>History</span>
+        <span style={{ fontSize: '11px', fontWeight: isActive('/history') ? 600 : 500 }}>
+          History
+        </span>
       </Link>
-      
+
+      {/* Center FAB */}
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+        }}
+      >
+        <button
+          onClick={onLogClick}
+          style={{
+            position: 'absolute',
+            bottom: '14px',
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--color-primary)',
+            color: '#ffffff',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-fab)',
+            transition: 'transform 150ms ease, box-shadow 150ms ease',
+          }}
+          onMouseDown={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.94)'
+          }}
+          onMouseUp={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+          }}
+          onTouchStart={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.94)'
+          }}
+          onTouchEnd={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+          }}
+          aria-label="Log transaction"
+        >
+          <Plus size={26} strokeWidth={2.5} />
+        </button>
+      </div>
+
+      {/* Log — placeholder, no link yet */}
+      <button
+        className="nav-tab"
+        style={{
+          color: 'var(--color-text-muted)',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+        aria-label="Log (coming soon)"
+      >
+        <BookOpen size={22} strokeWidth={1.5} />
+        <span style={{ fontSize: '11px', fontWeight: 500 }}>Log</span>
+      </button>
+
+      {/* Settings */}
       <Link href="/settings" className={`nav-tab ${isActive('/settings') ? 'active' : ''}`}>
         <Settings size={22} strokeWidth={isActive('/settings') ? 2.5 : 1.5} />
-        <span style={{ fontSize: '11px', fontWeight: isActive('/settings') ? 600 : 500 }}>Settings</span>
+        <span style={{ fontSize: '11px', fontWeight: isActive('/settings') ? 600 : 500 }}>
+          Settings
+        </span>
       </Link>
     </nav>
   )
 }
-

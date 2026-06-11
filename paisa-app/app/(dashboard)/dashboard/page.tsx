@@ -6,13 +6,9 @@ import { useRealtimeTransactions } from '@/hooks/useRealtimeTransactions'
 import { TransactionCard } from '@/components/TransactionCard'
 import { formatPKR } from '@/lib/utils'
 import { showToast } from '@/lib/toast'
-import { TrendingUp, TrendingDown, CreditCard, Shield, RefreshCw } from 'lucide-react'
+import { TrendingUp, TrendingDown, CreditCard, RefreshCw, Wallet, ArrowUpRight } from 'lucide-react'
 import { Transaction, Profile } from '@/types'
 
-/**
- * Hallmark · macrostructure: Workbench · tone: Utilitarian+Warm · anchor hue: blue
- * Last build: none (new session)
- */
 export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<{
@@ -27,9 +23,7 @@ export default function DashboardPage() {
   const fetchSummary = useCallback(async () => {
     try {
       const res = await fetch('/api/dashboard/summary')
-      if (!res.ok) {
-        throw new Error('Failed to load dashboard data')
-      }
+      if (!res.ok) throw new Error('Failed to load dashboard data')
       const json = await res.json()
       setData(json)
     } catch (err) {
@@ -55,13 +49,10 @@ export default function DashboardPage() {
         const exists = prev.recentTransactions.some((t) => t.id === newTxn.id)
         if (exists) return prev
         const updatedRecent = [newTxn, ...prev.recentTransactions].slice(0, 5)
-        
-        // Show notification ONLY if someone else added it
         if (newTxn.logged_by !== prev.profile.id) {
           setRealtimeNotify(true)
           setTimeout(() => setRealtimeNotify(false), 3000)
         }
-        
         fetchSummary()
         return { ...prev, recentTransactions: updatedRecent }
       })
@@ -70,18 +61,22 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="page-content pt-4 space-y-6">
-        <div className="space-y-2">
-          <div className="h-4 w-24 skeleton"></div>
-          <div className="h-8 w-48 skeleton"></div>
+      <div className="page-content" style={{ paddingTop: 'var(--space-8)', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+        {/* Greeting skeleton */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div className="skeleton" style={{ height: '13px', width: '80px', borderRadius: '6px' }} />
+          <div className="skeleton" style={{ height: '26px', width: '180px', borderRadius: '8px' }} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="h-32 rounded-xl skeleton"></div>
-          <div className="h-32 rounded-xl skeleton"></div>
+        {/* Cards skeleton */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+          <div className="skeleton" style={{ height: '120px', borderRadius: '12px' }} />
+          <div className="skeleton" style={{ height: '120px', borderRadius: '12px' }} />
         </div>
-        <div className="space-y-4">
-          <div className="h-5 w-40 skeleton"></div>
-          <div className="h-24 rounded-xl skeleton"></div>
+        {/* Transactions skeleton */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div className="skeleton" style={{ height: '16px', width: '100px', borderRadius: '6px' }} />
+          <div className="skeleton" style={{ height: '80px', borderRadius: '12px' }} />
+          <div className="skeleton" style={{ height: '80px', borderRadius: '12px' }} />
         </div>
       </div>
     )
@@ -94,64 +89,156 @@ export default function DashboardPage() {
   const isDad = data.profile.role === 'dad'
 
   return (
-    <div className="page-content" style={{ paddingTop: 'var(--space-12)', paddingBottom: 'calc(var(--nav-height) + var(--space-8))', display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
-      {/* Greeting */}
-      <section style={{ gap: 'var(--space-1)', display: 'flex', flexDirection: 'column' }}>
-        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Welcome back</p>
-        <h2 className="text-page-title">
-          Hi, {data.profile.displayName} {isDad ? 'Dad 👋' : isMom ? 'Mom 👋' : '👋'}
-        </h2>
+    <div
+      className="page-content"
+      style={{
+        paddingTop: 'var(--space-8)',
+        paddingBottom: 'calc(var(--nav-height) + var(--space-8))',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-6)',
+      }}
+    >
+      {/* ── Greeting ── */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+          Welcome back
+        </p>
+        <h1 className="text-page-title">
+          Hi, {data.profile.displayName} {isDad ? '👋' : isMom ? '👋' : '👋'}
+        </h1>
       </section>
 
-      {/* Summary Grid */}
-      <section className="grid grid-cols-2" style={{ gap: 'var(--space-4)' }}>
-        <div className="card flex flex-col justify-between" style={{ height: '120px', padding: 'var(--space-4)' }}>
-          <div className="flex items-center justify-between">
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>This Month</p>
-            {isUp ? <TrendingUp size={16} color="var(--color-success)" /> : <TrendingDown size={16} color="var(--color-error)" />}
+      {/* ── Realtime Notification ── */}
+      {realtimeNotify && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'var(--color-primary-light)',
+            color: 'var(--color-primary)',
+            fontSize: '13px',
+            fontWeight: 500,
+            padding: '10px 14px',
+            borderRadius: 'var(--border-radius)',
+            border: '1px solid rgba(26, 86, 219, 0.2)',
+          }}
+        >
+          <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
+          <span>New transaction added by your partner</span>
+        </div>
+      )}
+
+      {/* ── Summary Cards ── */}
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+        {/* This Month */}
+        <div
+          className="card"
+          style={{
+            padding: 'var(--space-4)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '120px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-muted)' }}>
+              This Month
+            </p>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                backgroundColor: isUp ? 'var(--color-success-light)' : 'var(--color-error-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {isUp
+                ? <TrendingUp size={14} color="var(--color-success)" />
+                : <TrendingDown size={14} color="var(--color-error)" />
+              }
+            </div>
           </div>
-          <div>
-            <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>{formatPKR(data.summary.thisMonthTotal)}</p>
-            <p style={{ fontSize: '12px', fontWeight: 500, color: isUp ? 'var(--color-success)' : 'var(--color-error)' }}>
-              {isUp ? '+' : ''}{data.summary.changePercent}%
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text)', letterSpacing: '-0.3px', lineHeight: 1 }}>
+              {formatPKR(data.summary.thisMonthTotal)}
+            </p>
+            <p style={{ fontSize: '12px', fontWeight: 600, color: isUp ? 'var(--color-success)' : 'var(--color-error)' }}>
+              {isUp ? '+' : ''}{data.summary.changePercent}% vs last month
             </p>
           </div>
         </div>
 
-        <div className="card flex flex-col justify-between" style={{ height: '120px', padding: 'var(--space-4)' }}>
-          <div className="flex items-center justify-between">
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Total Given</p>
-            <CreditCard size={16} color="var(--color-primary)" />
+        {/* All Time */}
+        <div
+          className="card"
+          style={{
+            padding: 'var(--space-4)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '120px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-muted)' }}>
+              Total Given
+            </p>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--color-primary-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CreditCard size={14} color="var(--color-primary)" />
+            </div>
           </div>
-          <div>
-            <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-text)' }}>{formatPKR(data.summary.allTimeTotal)}</p>
-            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-muted)' }}>All time</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text)', letterSpacing: '-0.3px', lineHeight: 1 }}>
+              {formatPKR(data.summary.allTimeTotal)}
+            </p>
+            <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-text-muted)' }}>
+              All time
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Realtime Notification */}
-      {realtimeNotify && (
-        <div style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', fontSize: '13px', padding: '10px 16px', borderRadius: 'var(--border-radius)', border: '1px solid var(--color-primary)' }} className="flex items-center gap-2 animate-toast-in">
-          <RefreshCw size={14} className="animate-spin" />
-          <span>New transaction added</span>
-        </div>
-      )}
-
-      {/* Transactions */}
-      <section style={{ gap: 'var(--space-4)', display: 'flex', flexDirection: 'column' }}>
-        <div className="flex items-center justify-between">
-          <h3 className="text-section-heading text-text-primary">Recent</h3>
+      {/* ── Recent Transactions ── */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 className="text-section-heading">Recent</h2>
           <button
             onClick={() => router.push('/history')}
-            className="text-primary text-[12px] font-semibold hover:underline bg-transparent border-none cursor-pointer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--color-primary)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 0',
+            }}
           >
-            View All
+            View All <ArrowUpRight size={13} />
           </button>
         </div>
 
         {data.recentTransactions.length > 0 ? (
-          <div style={{ gap: 'var(--space-3)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {data.recentTransactions.map((txn) => (
               <TransactionCard
                 key={txn.id}
@@ -162,23 +249,31 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="card p-8 text-center border-dashed border-2 flex flex-col items-center gap-2">
-            <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>No transactions yet</p>
+          <div
+            className="card"
+            style={{
+              padding: 'var(--space-8)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              borderStyle: 'dashed',
+              borderColor: 'var(--color-border)',
+              borderWidth: '2px',
+              backgroundColor: 'var(--color-bg)',
+              boxShadow: 'none',
+            }}
+          >
+            <Wallet size={28} color="var(--color-text-muted)" strokeWidth={1.5} />
+            <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
+              No transactions yet
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+              Tap the + button below to log your first one
+            </p>
           </div>
         )}
-      </section>
-
-      {/* Info Banner */}
-      <section style={{ backgroundColor: 'var(--color-primary)', color: 'white', borderRadius: 'var(--border-radius)', padding: 'var(--space-4)' }} className="shadow-sm">
-        <h4 style={{ fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={16} /> Shared Wallet Security
-        </h4>
-        <p style={{ fontSize: '13px', marginTop: '4px', opacity: 0.9 }}>
-          Your financial logs are synchronized instantly.
-        </p>
       </section>
     </div>
   )
 }
-
-

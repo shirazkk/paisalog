@@ -5,29 +5,28 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { showToast } from '@/lib/toast'
 import { formatPKR } from '@/lib/utils'
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  Home, 
-  ShoppingCart, 
-  Bolt, 
-  User, 
-  Package, 
-  Calendar, 
-  FileText, 
-  UserCircle, 
+import {
+  ArrowLeft,
+  ArrowRight,
+  Home,
+  ShoppingCart,
+  Bolt,
+  User,
+  Package,
+  Calendar,
+  FileText,
+  UserCircle,
   Clock,
   Trash2,
-  AlertCircle
 } from 'lucide-react'
 import { Transaction, Profile } from '@/types'
 
-const CATEGORY_MAP: Record<string, { label: string; bgClass: string; icon: any }> = {
-  home_expenses: { label: 'Home Expenses', bgClass: 'badge-home', icon: Home },
-  grocery: { label: 'Grocery', bgClass: 'badge-grocery', icon: ShoppingCart },
-  utility: { label: 'Utility', bgClass: 'badge-utility', icon: Bolt },
-  personal: { label: 'Personal', bgClass: 'badge-personal', icon: User },
-  other: { label: 'Other', bgClass: 'badge-other', icon: Package },
+const CATEGORY_MAP: Record<string, { label: string; bgClass: string; icon: any; color: string; bg: string }> = {
+  home_expenses: { label: 'Home Expenses', bgClass: 'badge-home', icon: Home,         color: '#16a34a', bg: '#dcfce7' },
+  grocery:       { label: 'Grocery',       bgClass: 'badge-grocery', icon: ShoppingCart, color: '#d97706', bg: '#ffedd5' },
+  utility:       { label: 'Utility',       bgClass: 'badge-utility', icon: Bolt,         color: '#7c3aed', bg: '#ede9fe' },
+  personal:      { label: 'Personal',      bgClass: 'badge-personal', icon: User,         color: '#374151', bg: '#f3f4f6' },
+  other:         { label: 'Other',         bgClass: 'badge-other', icon: Package,      color: '#1d4ed8', bg: '#dbeafe' },
 }
 
 export default function TransactionDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,255 +36,445 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
   const [members, setMembers] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true)
-        
-        // Get current user session
         const { data: { session } } = await supabase.auth.getSession()
         setCurrentUser(session?.user.id || null)
+        if (!session) { router.push('/login'); return }
 
-        if (!session) {
-          router.push('/login')
-          return
-        }
-
-        // Fetch transaction detail
         const { data: txn, error: txnError } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('id', resolvedParams.id)
-          .single()
-
+          .from('transactions').select('*').eq('id', resolvedParams.id).single()
         if (txnError) throw txnError
         setTransaction(txn)
 
-        // Fetch household members to resolve profile names/roles
         const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('household_id', txn.household_id)
-
+          .from('profiles').select('*').eq('household_id', txn.household_id)
         if (profilesError) throw profilesError
         setMembers(profiles)
-
       } catch (err: any) {
-        console.error('[Detail Fetch Error]', err)
         showToast("Couldn't find this transaction.", 'error')
         router.push('/history')
       } finally {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [resolvedParams.id, router])
 
   const handleDelete = async () => {
     if (!transaction) return
-    
-    // We use a custom confirm logic later, for now browser confirm matches SADAPAY/EASYPAISA simplicity
-    if (!confirm('Are you sure you want to delete this transaction? This cannot be undone.')) return
-
     try {
       setIsDeleting(true)
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', transaction.id)
-
+      const { error } = await supabase.from('transactions').delete().eq('id', transaction.id)
       if (error) throw error
-
       showToast('Transaction deleted ✓', 'success')
       router.push('/history')
       router.refresh()
     } catch (err: any) {
-      console.error('[Delete Error]', err)
       showToast("Couldn't delete. Please try again.", 'error')
     } finally {
       setIsDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
   if (loading) {
     return (
-      <div className="page-content pt-4 space-y-6">
-        <div className="h-6 w-32 skeleton"></div>
-        <div className="h-56 rounded-2xl skeleton shadow-sm"></div>
-        <div className="space-y-4 pt-4">
-          <div className="h-20 rounded-xl skeleton shadow-sm"></div>
-          <div className="h-20 rounded-xl skeleton shadow-sm"></div>
-          <div className="h-20 rounded-xl skeleton shadow-sm"></div>
-        </div>
+      <div className="page-content" style={{ paddingTop: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        <div className="skeleton" style={{ height: '26px', width: '160px', borderRadius: '8px' }} />
+        <div className="skeleton" style={{ height: '220px', borderRadius: '16px' }} />
+        <div className="skeleton" style={{ height: '180px', borderRadius: '16px' }} />
       </div>
     )
   }
 
   if (!transaction) return null
 
-  // Resolve specific profiles
-  const giver = members.find(m => m.id === transaction.giver_id)
+  const giver    = members.find(m => m.id === transaction.giver_id)
   const receiver = members.find(m => m.id === transaction.receiver_id)
-  const logger = members.find(m => m.id === transaction.logged_by)
+  const logger   = members.find(m => m.id === transaction.logged_by)
 
-  const giverRole = giver?.role?.toLowerCase() || 'dad'
+  const giverRole    = giver?.role?.toLowerCase()    || 'dad'
   const receiverRole = receiver?.role?.toLowerCase() || 'mom'
-  
+
   const categoryInfo = CATEGORY_MAP[transaction.category] || CATEGORY_MAP.other
   const CategoryIcon = categoryInfo.icon
 
-  // Format dates for display
   const txnDate = new Date(transaction.txn_date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   })
 
   const loggedDateTime = new Date(transaction.logged_at).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true,
   })
 
-  // Only the person who logged the transaction can delete it
   const canDelete = currentUser === transaction.logged_by
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg">
-      {/* Top Header Bar */}
-      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] h-14 bg-white border-b border-border z-40 flex items-center px-4">
-        <button 
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)' }}>
+
+      {/* ── Inline page header (not fixed — layout header handles that) ── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: 'var(--space-4) var(--space-4) 0',
+        }}
+      >
+        <button
           onClick={() => router.back()}
-          className="w-10 h-10 -ml-2 flex items-center justify-center text-text-muted active:scale-90 transition-transform"
-          aria-label="Go back"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '14px',
+            fontWeight: 600,
+            color: 'var(--color-primary)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '4px 0',
+            minHeight: '44px',
+          }}
         >
-          <ArrowLeft size={22} />
+          <ArrowLeft size={18} />
+          Back
         </button>
-        <h1 className="text-lg font-bold text-text-primary ml-2">Transaction Detail</h1>
-        
+
         {canDelete && (
-          <button 
-            onClick={handleDelete}
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
             disabled={isDeleting}
-            className="ml-auto w-10 h-10 flex items-center justify-center text-error active:scale-90 transition-all disabled:opacity-50"
-            title="Delete transaction"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              backgroundColor: 'var(--color-error-light)',
+              border: '1px solid rgba(220,38,38,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'var(--color-error)',
+              opacity: isDeleting ? 0.5 : 1,
+            }}
+            aria-label="Delete transaction"
           >
-            <Trash2 size={20} />
+            <Trash2 size={16} />
           </button>
         )}
-      </header>
+      </div>
 
-      <main className="page-content pt-20 pb-24 space-y-6">
-        {/* Large Amount Display Card */}
-        <section className="card p-8 flex flex-col items-center text-center space-y-5 shadow-sm border border-border/50">
-          <div className="space-y-1">
-            <span className="text-[12px] uppercase tracking-wider font-bold text-text-muted">Total Amount</span>
-            <h2 className="text-amount text-[36px] text-text-primary leading-none">
+      <div
+        className="page-content"
+        style={{
+          paddingTop: 'var(--space-4)',
+          paddingBottom: 'calc(var(--nav-height) + var(--space-8))',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-4)',
+        }}
+      >
+
+        {/* ── Hero amount card ── */}
+        <div
+          className="card"
+          style={{
+            padding: 'var(--space-6) var(--space-4)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 'var(--space-4)',
+            background: `linear-gradient(145deg, var(--color-surface) 60%, ${categoryInfo.bg})`,
+          }}
+        >
+          {/* Category badge */}
+          <span
+            className={`badge ${categoryInfo.bgClass}`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+          >
+            <CategoryIcon size={12} />
+            {categoryInfo.label}
+          </span>
+
+          {/* Amount */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+            <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Amount
+            </p>
+            <p style={{ fontSize: '40px', fontWeight: 700, color: 'var(--color-text)', letterSpacing: '-1.5px', lineHeight: 1 }}>
               {formatPKR(transaction.amount)}
-            </h2>
+            </p>
           </div>
 
-          <div className={`badge ${categoryInfo.bgClass} gap-1.5 py-1.5 px-4`}>
-            <CategoryIcon size={14} />
-            <span className="font-semibold">{categoryInfo.label}</span>
-          </div>
-
-          {/* User Flow Flow: Source -> Destination */}
-          <div className="flex items-center gap-6 pt-2 w-full justify-center">
-            <div className="flex flex-col items-center gap-2">
-              <div className={`avatar w-14 h-14 text-[18px] shadow-sm ${giverRole === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}>
+          {/* Flow: Giver → Receiver */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-5)',
+              padding: 'var(--space-4) var(--space-6)',
+              borderRadius: 'var(--border-radius)',
+              backgroundColor: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+              width: '100%',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Giver */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <div
+                className={`avatar ${giverRole === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}
+                style={{ width: '48px', height: '48px', fontSize: '18px', borderRadius: '14px' }}
+              >
                 {giverRole === 'dad' ? 'D' : 'M'}
               </div>
-              <div className="flex flex-col">
-                <span className="text-[13px] font-bold text-text-primary leading-tight">{giver?.display_name || 'Giver'}</span>
-                <span className="text-[11px] text-text-muted uppercase tracking-tighter">Source</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text)' }}>
+                  {giver?.display_name || (giverRole === 'dad' ? 'Dad' : 'Mom')}
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Sender
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center mb-6">
-              <ArrowRight className="text-text-muted opacity-50" size={24} strokeWidth={2.5} />
+            {/* Arrow */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--color-text-muted)' }}>
+              <div style={{ width: '20px', height: '1.5px', backgroundColor: 'var(--color-border)' }} />
+              <ArrowRight size={14} />
             </div>
 
-            <div className="flex flex-col items-center gap-2">
-              <div className={`avatar w-14 h-14 text-[18px] shadow-sm ${receiverRole === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}>
+            {/* Receiver */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <div
+                className={`avatar ${receiverRole === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}
+                style={{ width: '48px', height: '48px', fontSize: '18px', borderRadius: '14px' }}
+              >
                 {receiverRole === 'dad' ? 'D' : 'M'}
               </div>
-              <div className="flex flex-col">
-                <span className="text-[13px] font-bold text-text-primary leading-tight">{receiver?.display_name || 'Receiver'}</span>
-                <span className="text-[11px] text-text-muted uppercase tracking-tighter">Recipient</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-text)' }}>
+                  {receiver?.display_name || (receiverRole === 'dad' ? 'Dad' : 'Mom')}
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Receiver
+                </p>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Detailed Information List */}
-        <section className="space-y-3">
-          <h3 className="text-section-heading text-[13px] text-text-muted font-bold tracking-widest uppercase px-1">Details</h3>
-          
-          <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
-            {/* Transaction Date */}
-            <div className="p-4 flex items-start gap-4 border-b border-border/60 active:bg-gray-50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary shrink-0">
-                <Calendar size={20} />
-              </div>
-              <div className="flex flex-col justify-center min-h-[40px]">
-                <span className="text-[12px] font-bold text-text-muted uppercase tracking-tight">Given On</span>
-                <span className="text-[15px] font-semibold text-text-primary">{txnDate}</span>
-              </div>
-            </div>
+        {/* ── Detail rows ── */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
 
-            {/* Note Section */}
-            <div className="p-4 flex items-start gap-4 border-b border-border/60 active:bg-gray-50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary shrink-0">
-                <FileText size={20} />
-              </div>
-              <div className="flex flex-col justify-center min-h-[40px]">
-                <span className="text-[12px] font-bold text-text-muted uppercase tracking-tight">Note</span>
-                <span className="text-[15px] font-medium text-text-primary leading-relaxed">
-                  {transaction.note || <span className="text-text-muted/60 italic font-normal">No additional details</span>}
-                </span>
-              </div>
-            </div>
+          {/* Date */}
+          <DetailRow
+            icon={<Calendar size={16} color={categoryInfo.color} />}
+            iconBg={categoryInfo.bg}
+            label="Transaction Date"
+            value={txnDate}
+            border
+          />
 
-            {/* Logger Metadata */}
-            <div className="p-4 flex items-start gap-4 active:bg-gray-50 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary shrink-0">
-                <UserCircle size={20} />
-              </div>
-              <div className="flex flex-col justify-center min-h-[40px]">
-                <span className="text-[12px] font-bold text-text-muted uppercase tracking-tight">Logged By</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-semibold text-text-primary">{logger?.display_name || 'Partner'}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-tighter ${
-                    logger?.role === 'Dad' ? 'bg-dad/10 text-dad' : 'bg-mom/10 text-mom'
-                  }`}>
-                    {logger?.role}
-                  </span>
+          {/* Note */}
+          <DetailRow
+            icon={<FileText size={16} color="var(--color-primary)" />}
+            iconBg="var(--color-primary-light)"
+            label="Note"
+            value={transaction.note || ''}
+            placeholder="No additional details"
+            border
+          />
+
+          {/* Logged by */}
+          <DetailRow
+            icon={<UserCircle size={16} color="#7c3aed" />}
+            iconBg="#ede9fe"
+            label="Logged By"
+            value={logger?.display_name || 'Partner'}
+            badge={logger?.role}
+            badgeIsDad={logger?.role?.toLowerCase() === 'dad'}
+          />
+        </div>
+
+        {/* ── Timestamp ── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: 'var(--space-2) 0 var(--space-4)',
+          }}
+        >
+          <Clock size={13} color="var(--color-text-muted)" />
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+            Logged {loggedDateTime}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Delete confirm sheet ── */}
+      {showDeleteConfirm && (
+        <div
+          className="sheet-overlay entering"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowDeleteConfirm(false) }}
+        >
+          <div
+            className="sheet entering"
+            style={{ padding: 'var(--space-5) var(--space-4) var(--space-8)' }}
+          >
+            <div className="sheet-handle" />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              {/* Icon */}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '16px',
+                    backgroundColor: 'var(--color-error-light)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Trash2 size={24} color="var(--color-error)" />
                 </div>
               </div>
+
+              {/* Text */}
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--color-text)' }}>
+                  Delete Transaction?
+                </h3>
+                <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+                  This will permanently remove the{' '}
+                  <strong style={{ color: 'var(--color-text)' }}>{formatPKR(transaction.amount)}</strong>{' '}
+                  transaction. This cannot be undone.
+                </p>
+              </div>
+
+              {/* Amount preview */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: 'var(--space-3) var(--space-4)',
+                  borderRadius: 'var(--border-radius)',
+                  backgroundColor: 'var(--color-bg)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                  {categoryInfo.label} · {new Date(transaction.txn_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+                <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text)' }}>
+                  {formatPKR(transaction.amount)}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="btn btn-destructive"
+                  style={{ backgroundColor: 'var(--color-error)', color: '#fff', opacity: isDeleting ? 0.6 : 1 }}
+                >
+                  {isDeleting ? 'Deleting…' : 'Yes, Delete'}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      )}
+    </div>
+  )
+}
 
-        {/* Audit Timestamp */}
-        <section className="flex flex-col items-center justify-center gap-1.5 pt-6 pb-4">
-          <div className="flex items-center gap-2 text-text-muted">
-            <Clock size={14} strokeWidth={2.5} />
-            <span className="text-[12px] font-medium">Created on {loggedDateTime}</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-border rounded-full shadow-xs">
-            <AlertCircle size={12} className="text-text-muted" />
-            <span className="text-[11px] text-text-muted font-medium">Securely synced with household</span>
-          </div>
-        </section>
-      </main>
+/* ── Reusable detail row ── */
+function DetailRow({
+  icon, iconBg, label, value, placeholder, badge, badgeIsDad, border,
+}: {
+  icon: React.ReactNode
+  iconBg: string
+  label: string
+  value: string
+  placeholder?: string
+  badge?: string
+  badgeIsDad?: boolean
+  border?: boolean
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 'var(--space-3)',
+        padding: 'var(--space-4)',
+        borderBottom: border ? '1px solid var(--color-border)' : 'none',
+      }}
+    >
+      <div
+        style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '10px',
+          backgroundColor: iconBg,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {label}
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <p style={{
+            fontSize: '15px',
+            fontWeight: value ? 500 : 400,
+            color: value ? 'var(--color-text)' : 'var(--color-text-muted)',
+            fontStyle: value ? 'normal' : 'italic',
+            lineHeight: 1.5,
+          }}>
+            {value || placeholder}
+          </p>
+          {badge && (
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: 'var(--border-radius-pill)',
+              backgroundColor: badgeIsDad ? 'rgba(59,130,246,0.1)' : 'rgba(236,72,153,0.1)',
+              color: badgeIsDad ? 'var(--color-dad)' : 'var(--color-mom)',
+              textTransform: 'capitalize',
+            }}>
+              {badge}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
