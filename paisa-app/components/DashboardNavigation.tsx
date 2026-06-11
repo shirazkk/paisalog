@@ -85,20 +85,13 @@ export function DashboardNavigation({ onLogClick }: DashboardNavigationProps) {
         </button>
       </div>
 
-      {/* Log — placeholder, no link yet */}
-      <button
-        className="nav-tab"
-        style={{
-          color: 'var(--color-text-muted)',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-        aria-label="Log (coming soon)"
-      >
-        <BookOpen size={22} strokeWidth={1.5} />
-        <span style={{ fontSize: '11px', fontWeight: 500 }}>Log</span>
-      </button>
+      {/* Reports */}
+      <Link href="/reports" className={`nav-tab ${isActive('/reports') ? 'active' : ''}`}>
+        <BookOpen size={22} strokeWidth={isActive('/reports') ? 2.5 : 1.5} />
+        <span style={{ fontSize: '11px', fontWeight: isActive('/reports') ? 600 : 500 }}>
+          Reports
+        </span>
+      </Link>
 
       {/* Settings */}
       <Link href="/settings" className={`nav-tab ${isActive('/settings') ? 'active' : ''}`}>
