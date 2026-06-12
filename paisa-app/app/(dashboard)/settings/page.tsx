@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { showToast } from '@/lib/toast'
 import { User, LogOut, UserCheck, Copy, Check, Home, Shield } from 'lucide-react'
+import { AvatarUploader } from '@/components/settings/AvatarUploader'
 
 export default function SettingsPage() {
   const router = useRouter()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [displayName, setDisplayName] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -22,6 +24,7 @@ export default function SettingsPage() {
         const json = await res.json()
         setData(json)
         setDisplayName(json.profile.display_name)
+        setAvatarUrl(json.profile.avatar_url)
       } catch (err) {
         showToast("Couldn't load settings.", 'error')
       } finally {
@@ -37,7 +40,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/profiles', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName }),
+        body: JSON.stringify({ displayName, avatarUrl }),
       })
       if (!res.ok) throw new Error('Failed to update')
       showToast('Profile updated ✓', 'success')
@@ -79,6 +82,7 @@ export default function SettingsPage() {
   const isDad = data.profile.role === 'dad'
   const hasPartner = !!data.partner
   const nameUnchanged = displayName === data.profile.display_name
+  const avatarUnchanged = avatarUrl === data.profile.avatar_url
 
   return (
     <div
@@ -103,12 +107,12 @@ export default function SettingsPage() {
 
           {/* Avatar + role row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-            <div
-              className={`avatar ${isDad ? 'avatar-dad' : 'avatar-mom'}`}
-              style={{ width: '44px', height: '44px', fontSize: '16px', borderRadius: '12px' }}
-            >
-              {isDad ? 'D' : 'M'}
-            </div>
+            <AvatarUploader 
+              currentUrl={avatarUrl} 
+              userId={data.profile.id} 
+              displayName={displayName}
+              onUpload={setAvatarUrl} 
+            />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
                 {data.profile.display_name}

@@ -14,7 +14,7 @@ export async function PATCH(request: NextRequest) {
     const userId = user.id;
 
     const body = await request.json();
-    const { displayName } = body;
+    const { displayName, avatarUrl } = body;
 
     if (!displayName || displayName.trim() === "") {
       return NextResponse.json(
@@ -23,9 +23,14 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    const updateData: { display_name: string; avatar_url?: string | null } = { display_name: displayName };
+    if (avatarUrl !== undefined) {
+      updateData.avatar_url = avatarUrl;
+    }
+
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ display_name: displayName })
+      .update(updateData)
       .eq("id", userId);
 
     if (updateError) throw updateError;

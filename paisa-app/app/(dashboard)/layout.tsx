@@ -66,9 +66,17 @@ export default async function DashboardLayout({
 
         <div
           className={`avatar ${profile.role === 'dad' ? 'avatar-dad' : 'avatar-mom'}`}
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '12px', overflow: 'hidden', padding: 0 }}
         >
-          {profile.role === 'dad' ? 'D' : 'M'}
+          {profile.avatar_url ? (
+            <img 
+              src={profile.avatar_url} 
+              alt={profile.display_name} 
+              style={{  width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
+          ) : (
+            profile.role === 'dad' ? 'D' : 'M'
+          )}
         </div>
       </header>
 
