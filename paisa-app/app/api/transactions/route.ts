@@ -1,41 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClientInstance } from "@/lib/supabase/server";
-import { z } from "zod";
-
-// Validation schema based on form-validation skill
-const transactionSchema = z.object({
-  amount: z
-    .string()
-    .min(1, "Amount is required")
-    .regex(/^\d+(\.\d{1,2})?$/, "Enter a valid amount (numbers only)")
-    .refine((val) => parseFloat(val) > 0, "Amount must be greater than 0")
-    .refine((val) => parseFloat(val) <= 9999999.99, "Amount is too large"),
-
-  direction: z.enum(["dad_to_mom", "mom_to_dad"], {
-    message: "Please select who gave the money",
-  }),
-
-  category: z.enum(
-    ["home_expenses", "grocery", "utility", "personal", "other"],
-    {
-      message: "Please select a category",
-    },
-  ),
-
-  txn_date: z
-    .string()
-    .min(1, "Date is required")
-    .refine((val) => {
-      const d = new Date(val);
-      return d <= new Date();
-    }, "Date cannot be in the future"),
-
-  note: z
-    .string()
-    .max(200, "Note must be 200 characters or less")
-    .optional()
-    .nullable(),
-});
+import { transactionSchema } from "@/lib/validations";
 
 export async function POST(request: NextRequest) {
   try {

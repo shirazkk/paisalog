@@ -23,10 +23,12 @@ export async function POST(request: NextRequest) {
     let inviteCode = ''
     let attempts = 0
 
-    while (!isUnique && attempts < 10) {
+    while (!isUnique && attempts < 15) {
       attempts++
-      const randomDigits = Math.floor(1000 + Math.random() * 9000)
-      inviteCode = `PL-${randomDigits}`
+      // Start with 4 digits, but increase complexity if we hit collisions
+      const complexity = attempts > 5 ? 100000 : 10000;
+      const randomDigits = Math.floor(1000 + Math.random() * (complexity - 1000));
+      inviteCode = `PL-${randomDigits}`;
 
       // Check if it already exists
       const { data: existing } = await supabaseService

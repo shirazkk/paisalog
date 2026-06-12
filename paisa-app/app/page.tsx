@@ -22,31 +22,18 @@ export default async function HomePage() {
   return (
     <div className="app-container" style={{ backgroundColor: "var(--color-surface)" }}>
       {/* Hero Section */}
-      <section style={{ 
-        padding: "var(--space-12) var(--space-6) var(--space-8)",
-        textAlign: "center",
-        background: "linear-gradient(180deg, var(--color-primary-light) 0%, #ffffff 100%)",
-      }}>
-        <div style={{ 
-          display: "inline-flex", 
-          alignItems: "center", 
-          gap: "8px", 
-          padding: "8px 16px",
-          backgroundColor: "#ffffff",
-          borderRadius: "var(--border-radius-pill)",
-          boxShadow: "var(--shadow-card)",
-          marginBottom: "var(--space-6)",
-        }}>
+      <section className="hero-section">
+        <div className="hero-pill">
           <Wallet size={18} color="var(--color-primary)" />
           <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-primary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             PaisaLog v1.0
           </span>
         </div>
 
-        <h1 className="text-page-title" style={{ fontSize: "36px", marginBottom: "var(--space-4)", lineHeight: 1.1 }}>
+        <h1 className="text-page-title hero-title">
           Never fight about <span style={{ color: "var(--color-primary)" }}>money</span> again.
         </h1>
-        <p className="text-body" style={{ color: "var(--color-text-muted)", fontSize: "17px", marginBottom: "var(--space-8)" }}>
+        <p className="hero-subtitle">
           The dead-simple household tracker for Dad and Mom to log, share, and remember every rupee.
         </p>
 
@@ -61,18 +48,8 @@ export default async function HomePage() {
       </section>
 
       {/* App Preview / Mockup UI */}
-      <section style={{ padding: "0 var(--space-6)", marginTop: "-20px" }}>
-        <div className="card" style={{ 
-          padding: "var(--space-2)", 
-          backgroundColor: "#f3f4f6", 
-          border: "4px solid #ffffff",
-          height: "200px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          overflow: "hidden",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
-        }}>
+      <section className="app-preview-container">
+        <div className="app-preview-card">
            <div style={{ height: "40px", width: "100%", backgroundColor: "#ffffff", borderRadius: "8px", display: "flex", alignItems: "center", padding: "0 12px" }}>
               <div style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "var(--color-dad)" }} />
               <div style={{ width: "12px", height: "2px", backgroundColor: "#e5e7eb", margin: "0 8px" }} />
@@ -92,14 +69,14 @@ export default async function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: "var(--space-12) var(--space-6)" }}>
+      <section className="feature-section">
         <h2 className="text-section-heading" style={{ marginBottom: "var(--space-6)", textAlign: "center" }}>
           Built for Families
         </h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
           <div className="card" style={{ display: "flex", gap: "var(--space-4)", alignItems: "start" }}>
-            <div style={{ padding: "10px", backgroundColor: "var(--color-primary-light)", borderRadius: "12px", color: "var(--color-primary)" }}>
+            <div className="feature-card-icon" style={{ backgroundColor: "var(--color-primary-light)", color: "var(--color-primary)" }}>
               <Zap size={22} />
             </div>
             <div>
@@ -109,7 +86,7 @@ export default async function HomePage() {
           </div>
 
           <div className="card" style={{ display: "flex", gap: "var(--space-4)", alignItems: "start" }}>
-            <div style={{ padding: "10px", backgroundColor: "#f0fdf4", borderRadius: "12px", color: "#16a34a" }}>
+            <div className="feature-card-icon" style={{ backgroundColor: "#f0fdf4", color: "#16a34a" }}>
               <ShieldCheck size={22} />
             </div>
             <div>
@@ -119,7 +96,7 @@ export default async function HomePage() {
           </div>
 
           <div className="card" style={{ display: "flex", gap: "var(--space-4)", alignItems: "start" }}>
-            <div style={{ padding: "10px", backgroundColor: "#fef2f2", borderRadius: "12px", color: "#dc2626" }}>
+            <div className="feature-card-icon" style={{ backgroundColor: "#fef2f2", color: "#dc2626" }}>
               <Smartphone size={22} />
             </div>
             <div>
@@ -131,14 +108,7 @@ export default async function HomePage() {
       </section>
 
       {/* Closing CTA */}
-      <section style={{ 
-        padding: "var(--space-12) var(--space-6)", 
-        textAlign: "center",
-        backgroundColor: "var(--color-primary)",
-        color: "#ffffff",
-        margin: "0 var(--space-4) var(--space-8)",
-        borderRadius: "var(--border-radius)",
-      }}>
+      <section className="cta-section">
         <Heart size={32} style={{ marginBottom: "var(--space-4)" }} />
         <h2 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "var(--space-2)" }}>Better Finacial Harmony</h2>
         <p style={{ opacity: 0.9, marginBottom: "var(--space-6)", fontSize: "14px" }}>Join families who have stopped arguing about small transfers and started trusting the record.</p>
