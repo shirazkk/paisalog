@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // 2. Protect dashboard routes
-  const protectedRoutes = ['/dashboard', '/history', '/reports', '/settings', '/join-household']
+  const protectedRoutes = ['/dashboard', '/history', '/settings', '/join-household']
   const isProtectedRoute = protectedRoutes.some(path => url.pathname.startsWith(path))
   
   if (!user && isProtectedRoute) {

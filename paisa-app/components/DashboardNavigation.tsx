@@ -85,11 +85,11 @@ export function DashboardNavigation({ onLogClick }: DashboardNavigationProps) {
         </button>
       </div>
 
-      {/* Reports */}
-      <Link href="/reports" className={`nav-tab ${isActive('/reports') ? 'active' : ''}`}>
-        <BookOpen size={22} strokeWidth={isActive('/reports') ? 2.5 : 1.5} />
-        <span style={{ fontSize: '11px', fontWeight: isActive('/reports') ? 600 : 500 }}>
-          Reports
+      {/* Budget */}
+      <Link href="/budget" className={`nav-tab ${isActive('/budget') ? 'active' : ''}`}>
+        <BookOpen size={22} strokeWidth={isActive('/budget') ? 2.5 : 1.5} />
+        <span style={{ fontSize: '11px', fontWeight: isActive('/budget') ? 600 : 500 }}>
+          Budget
         </span>
       </Link>
 

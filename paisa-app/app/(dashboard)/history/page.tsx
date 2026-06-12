@@ -4,17 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { TransactionCard } from '@/components/TransactionCard'
 import { showToast } from '@/lib/toast'
-import { Calendar, Search, X, ReceiptText, SlidersHorizontal } from 'lucide-react'
+import { Calendar, Search, X, ReceiptText, SlidersHorizontal, BarChart3, List } from 'lucide-react'
 import { Transaction, Profile } from '@/types'
-
-const CATEGORIES = [
-  { value: 'all',           label: 'All'       },
-  { value: 'home_expenses', label: 'Home'      },
-  { value: 'grocery',       label: 'Grocery'   },
-  { value: 'utility',       label: 'Utilities' },
-  { value: 'personal',      label: 'Personal'  },
-  { value: 'other',         label: 'Other'     },
-]
+import { CATEGORIES } from '@/lib/constants'
+import { HistoryInsights } from '@/components/history/HistoryInsights'
 
 export default function HistoryPage() {
   const router = useRouter()
@@ -25,6 +18,7 @@ export default function HistoryPage() {
   const [selectedMonth, setSelectedMonth] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [showInsights, setShowInsights] = useState(false)
   const [monthsList, setMonthsList] = useState<{ value: string; label: string }[]>([])
 
   useEffect(() => {
@@ -109,7 +103,7 @@ export default function HistoryPage() {
       <div
         style={{
           position: 'sticky',
-          top: '56px', // below fixed header
+          top: '0', 
           zIndex: 30,
           backgroundColor: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-border)',
@@ -124,10 +118,29 @@ export default function HistoryPage() {
             display: 'flex',
             overflowX: 'auto',
             gap: 'var(--space-2)',
-            padding: '10px var(--space-4)',
+            padding: '12px var(--space-4) 8px',
             scrollbarWidth: 'none',
           }}
+          className="no-scrollbar"
         >
+          <button
+            onClick={() => setSelectedCategory('all')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 'var(--border-radius-pill)',
+              fontSize: '13px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              border: `1.5px solid ${selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              backgroundColor: selectedCategory === 'all' ? 'var(--color-primary)' : 'var(--color-surface)',
+              color: selectedCategory === 'all' ? '#ffffff' : 'var(--color-text-muted)',
+              cursor: 'pointer',
+              transition: 'all 120ms ease',
+              flexShrink: 0,
+            }}
+          >
+            All
+          </button>
           {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.value
             return (
@@ -160,7 +173,7 @@ export default function HistoryPage() {
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--space-2)',
-            padding: '8px var(--space-4) 10px',
+            padding: '4px var(--space-4) 12px',
           }}
         >
           {/* Month select */}
@@ -199,6 +212,30 @@ export default function HistoryPage() {
             </select>
           </div>
 
+          {/* Toggle View (Insights/List) */}
+          <button
+            onClick={() => setShowInsights(!showInsights)}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: 'var(--border-radius)',
+              border: `1.5px solid ${showInsights ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              backgroundColor: showInsights ? 'var(--color-primary-light)' : 'var(--color-bg)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all 120ms ease',
+            }}
+            aria-label={showInsights ? 'Show list' : 'Show insights'}
+          >
+            {showInsights
+              ? <List size={18} color="var(--color-primary)" />
+              : <BarChart3 size={18} color="var(--color-text-muted)" />
+            }
+          </button>
+
           {/* Search toggle */}
           <button
             onClick={() => {
@@ -229,7 +266,7 @@ export default function HistoryPage() {
 
         {/* Search input — slides in */}
         {showSearch && (
-          <div style={{ padding: '0 var(--space-4) 10px' }}>
+          <div style={{ padding: '0 var(--space-4) 12px' }}>
             <input
               type="text"
               placeholder="Search by note…"
@@ -254,140 +291,143 @@ export default function HistoryPage() {
           flex: 1,
         }}
       >
-        {/* Result count */}
-        {!loading && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
-              {totalFiltered === 0
-                ? 'No transactions'
-                : `${totalFiltered} transaction${totalFiltered !== 1 ? 's' : ''}`}
-            </p>
-            {(selectedCategory !== 'all' || (selectedMonth && selectedMonth !== 'all') || searchQuery) && (
-              <button
-                onClick={() => {
-                  setSelectedCategory('all')
-                  setSelectedMonth('all')
-                  setSearchQuery('')
-                  setShowSearch(false)
-                }}
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--color-primary)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px 0',
-                }}
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                <div className="skeleton" style={{ height: '13px', width: '80px', borderRadius: '6px' }} />
-                <div className="skeleton" style={{ height: '72px', borderRadius: '12px' }} />
-              </div>
-            ))}
-          </div>
-
-        ) : sortedDates.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-            {sortedDates.map((date) => (
-              <section key={date} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                {/* Date group header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <p
+        {showInsights ? (
+          <HistoryInsights selectedMonth={selectedMonth} />
+        ) : (
+          <>
+            {/* Result count */}
+            {!loading && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                  {totalFiltered === 0
+                    ? 'No transactions'
+                    : `${totalFiltered} transaction${totalFiltered !== 1 ? 's' : ''}`}
+                </p>
+                {(selectedCategory !== 'all' || (selectedMonth && selectedMonth !== 'all') || searchQuery) && (
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('all')
+                      setSelectedMonth('all')
+                      setSearchQuery('')
+                      setShowSearch(false)
+                    }}
                     style={{
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      color: 'var(--color-text-muted)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      whiteSpace: 'nowrap',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--color-primary)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px 0',
                     }}
                   >
-                    {getGroupTitle(date)}
-                  </p>
-                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
-                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                    {groupedTransactions[date].length} {groupedTransactions[date].length === 1 ? 'entry' : 'entries'}
-                  </p>
-                </div>
-
-                {/* Transaction cards for this date */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-                  {groupedTransactions[date].map((txn) => (
-                    <TransactionCard
-                      key={txn.id}
-                      transaction={txn}
-                      members={members}
-                      onClick={() => router.push(`/history/${txn.id}`)}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-
-        ) : (
-          /* Empty state */
-          <div
-            className="card"
-            style={{
-              padding: 'var(--space-12) var(--space-4)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 'var(--space-3)',
-              border: '2px dashed var(--color-border)',
-              backgroundColor: 'var(--color-bg)',
-              boxShadow: 'none',
-              textAlign: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '14px',
-                backgroundColor: 'var(--color-primary-light)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <ReceiptText size={22} color="var(--color-primary)" strokeWidth={1.5} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
-                No transactions found
-              </p>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                {searchQuery
-                  ? `No results for "${searchQuery}"`
-                  : selectedCategory !== 'all'
-                    ? 'Try a different category or time range'
-                    : 'Log your first transaction using the + button'
-                }
-              </p>
-            </div>
-            {(selectedCategory !== 'all' || searchQuery) && (
-              <button
-                onClick={() => { setSelectedCategory('all'); setSearchQuery(''); setShowSearch(false) }}
-                className="btn btn-secondary"
-                style={{ width: 'auto', height: '36px', padding: '0 var(--space-4)', fontSize: '13px' }}
-              >
-                Clear filters
-              </button>
+                    Clear filters
+                  </button>
+                )}
+              </div>
             )}
-          </div>
+
+            {/* Loading */}
+            {loading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                    <div className="skeleton" style={{ height: '13px', width: '80px', borderRadius: '6px' }} />
+                    <div className="skeleton" style={{ height: '72px', borderRadius: '12px' }} />
+                  </div>
+                ))}
+              </div>
+
+            ) : sortedDates.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+                {sortedDates.map((date) => (
+                  <section key={date} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                    {/* Date group header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                      <p
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: 'var(--color-text-muted)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {getGroupTitle(date)}
+                      </p>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
+                    </div>
+
+                    {/* Transaction cards for this date */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                      {groupedTransactions[date].map((txn) => (
+                        <TransactionCard
+                          key={txn.id}
+                          transaction={txn}
+                          members={members}
+                          onClick={() => router.push(`/history/${txn.id}`)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+
+            ) : (
+              /* Empty state */
+              <div
+                className="card"
+                style={{
+                  padding: 'var(--space-12) var(--space-4)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 'var(--space-3)',
+                  border: '2px dashed var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  boxShadow: 'none',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '14px',
+                    backgroundColor: 'var(--color-primary-light)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ReceiptText size={22} color="var(--color-primary)" strokeWidth={1.5} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text)' }}>
+                    No transactions found
+                  </p>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                    {searchQuery
+                      ? `No results for "${searchQuery}"`
+                      : selectedCategory !== 'all'
+                        ? 'Try a different category or time range'
+                        : 'Log your first transaction using the + button'
+                    }
+                  </p>
+                </div>
+                {(selectedCategory !== 'all' || searchQuery) && (
+                  <button
+                    onClick={() => { setSelectedCategory('all'); setSearchQuery(''); setShowSearch(false) }}
+                    className="btn btn-secondary"
+                    style={{ width: 'auto', height: '36px', padding: '0 var(--space-4)', fontSize: '13px' }}
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

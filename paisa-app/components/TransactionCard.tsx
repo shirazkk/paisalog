@@ -4,34 +4,15 @@ import { Transaction, Profile } from "@/types";
 import { formatPKR } from "@/lib/utils";
 import {
   ArrowRight,
-  Home,
-  ShoppingCart,
-  Bolt,
-  User,
-  Package,
 } from "lucide-react";
-import React from "react";
+import { CATEGORY_MAP } from "@/lib/constants";
+
 
 interface TransactionCardProps {
   transaction: Transaction;
   members: Profile[];
   onClick?: () => void;
 }
-
-const CATEGORY_MAP: Record<
-  string,
-  {
-    label: string;
-    bgClass: string;
-    icon: React.ComponentType<{ size: number }>;
-  }
-> = {
-  home_expenses: { label: "Home", bgClass: "badge-home", icon: Home },
-  grocery: { label: "Grocery", bgClass: "badge-grocery", icon: ShoppingCart },
-  utility: { label: "Utility", bgClass: "badge-utility", icon: Bolt },
-  personal: { label: "Personal", bgClass: "badge-personal", icon: User },
-  other: { label: "Other", bgClass: "badge-other", icon: Package },
-};
 
 export function TransactionCard({
   transaction,

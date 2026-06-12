@@ -1,21 +1,14 @@
 import React from 'react';
 import { UseFormSetValue, FieldErrors } from 'react-hook-form';
 import { TransactionFormValues } from '@/lib/validations';
-import { Home, ShoppingCart, Bolt, User, Package, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { CATEGORIES } from '@/lib/constants';
 
 interface CategoryPickerProps {
   selectedCategory: string | undefined;
   setValue: UseFormSetValue<TransactionFormValues>;
   errors: FieldErrors<TransactionFormValues>;
 }
-
-const CATEGORIES = [
-  { value: 'home_expenses',  label: 'Home',     icon: Home,         color: '#16a34a', bg: '#dcfce7' },
-  { value: 'grocery',        label: 'Grocery',  icon: ShoppingCart, color: '#d97706', bg: '#ffedd5' },
-  { value: 'utility',        label: 'Utility',  icon: Bolt,         color: '#7c3aed', bg: '#ede9fe' },
-  { value: 'personal',       label: 'Personal', icon: User,         color: '#374151', bg: '#f3f4f6' },
-  { value: 'other',          label: 'Other',    icon: Package,      color: '#1d4ed8', bg: '#dbeafe' },
-] as const;
 
 export function CategoryPicker({ selectedCategory, setValue, errors }: CategoryPickerProps) {
   return (

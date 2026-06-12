@@ -12,6 +12,7 @@ export interface Profile {
   household_id: string | null
   display_name: string
   role: Role
+  avatar_url: string | null
   created_at: string
 }
 
