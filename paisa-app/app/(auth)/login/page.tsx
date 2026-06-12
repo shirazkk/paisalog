@@ -53,7 +53,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ maxWidth: '400px', margin: '0 auto', padding: '0 var(--space-4)' }}>
       {/* 1. Header Section */}
       <header className="flex flex-col items-center text-center px-4" style={{ marginTop: 'var(--space-12)', marginBottom: 'var(--space-6)' }}>
         <div className="flex items-center justify-center mb-4" style={{ width: '64px', height: '64px', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--color-primary)', color: '#ffffff' }}>

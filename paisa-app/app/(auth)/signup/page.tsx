@@ -77,7 +77,6 @@ export default function SignupPage() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        fontFamily: "Inter, sans-serif",
       }}
     >
       <main
